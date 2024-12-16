@@ -1,6 +1,13 @@
+import { BrowserRouter, Route, Routes } from "react-router-dom"
+import Map from "./routes/Map"
+
 function App() {
   return (
-    <p className="text-9xl">init</p>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/map" Component={Map}/>
+      </Routes>
+    </BrowserRouter>
   )
 }
 

@@ -1,6 +1,7 @@
 obj/
 wwwroot/
 bin/
+appsettings.json
 
 # Logs
 logs

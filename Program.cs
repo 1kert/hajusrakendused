@@ -7,6 +7,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+string? jwtKey = builder.Configuration["JwtKey"];
+if(jwtKey == null)
+{
+    Console.WriteLine("no jwt key found");
+    return;
+}
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => 
     {
@@ -17,7 +24,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = "dunno",
             ValidAudience = "dunno",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(""))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["JwtKey"]!))
         };
     });
 

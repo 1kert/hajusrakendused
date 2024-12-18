@@ -1,35 +1,5 @@
 import { FormEvent, useState } from "react"
-
-interface user {
-    username: string,
-    password: string
-}
-
-async function login(
-    user: user,
-    setToken: (str: string) => void,
-    setLoginStatus: (str: string) => void
-) {
-    console.log('run login');
-    const response = await fetch("/user/login", {
-        method: "POST",
-        body: JSON.stringify({
-            username: user.username,
-            password: user.password
-        }),
-        headers: new Headers({
-            "Content-Type": "Application/json"
-        })
-    })
-    if (response.status == 401) {
-        setLoginStatus("credentials invalid")
-    } else {
-        console.log(response);
-    }
-    const json = await response.json()
-    setToken(json.token)
-    setLoginStatus("logged in")
-}
+import Authorization, { user } from "../Authorization"
 
 function Login() {
     const [username, setUsername] = useState("")
@@ -43,7 +13,7 @@ function Login() {
             username,
             password
         }
-        login(user, setToken, setLoginStatus)
+        Authorization.login(user, setToken, setLoginStatus)
     }
     
     function handleUsernameChange(e: React.ChangeEvent<HTMLInputElement>) {

@@ -13,7 +13,7 @@ namespace hajusrakendused.controllers
     {
         private readonly string _jwtKey = configuration["JwtKey"]!;
 
-        [HttpPost("login")]
+        [HttpPost("login")] // TODO: add timeout
         public IActionResult Login([FromBody] Credentials user)
         {
             if(!user.Username.Equals("test") || !user.Password.Equals("123")) return Unauthorized();

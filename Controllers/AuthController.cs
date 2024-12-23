@@ -19,14 +19,17 @@ namespace hajusrakendused.controllers
             if(!user.Username.Equals("test") || !user.Password.Equals("123")) return Unauthorized();
             return Ok(new
             {
-                Token = JwtToken.GenerateJwtToken(user.Username, _jwtKey)
+                Token = AuthService.GenerateJwtToken(user.Username, _jwtKey)
             });
         }
         
         [HttpPost("register")]
         public IActionResult Register([FromBody] Credentials user)
         {
-            return Ok(user);
+            bool userExists = UserService.DoesUserExist(user);
+            if (userExists) return Conflict();
+            UserService.AddUserToDatabase(user);
+            return Ok();
         }
         
         [HttpPost("test")]

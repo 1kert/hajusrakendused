@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace hajusrakendused.Services;
 
-public class JwtToken
+public class AuthService
 {
     public static string GenerateJwtToken(string username, string keyStr)
     {

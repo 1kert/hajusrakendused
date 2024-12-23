@@ -4,12 +4,11 @@ export interface user {
 }
 
 export default class Authorization {
-    public static async login(
+    static async sendCreds(
         user: user,
-        setToken: (str: string) => void,
-        setLoginStatus: (str: string) => void
-    ) {
-        const response = await fetch("/user/login", {
+        endpoint: string
+    ): Promise<Response> {
+        return await fetch(endpoint, {
             method: "POST",
             body: JSON.stringify({
                 username: user.username,
@@ -19,9 +18,17 @@ export default class Authorization {
                 "Content-Type": "Application/json"
             })
         })
+    }
+
+    public static async login(
+        user: user,
+        setToken: (str: string) => void,
+        setLoginStatus: (str: string) => void
+    ) {
+        const response = await this.sendCreds(user, "/user/login")
         if (response.status == 401) {
             setLoginStatus("credentials invalid")
-        } else {
+        } else if(response.status != 200) {
             setLoginStatus(":(")
         }
         const json = await response.json()
@@ -33,17 +40,16 @@ export default class Authorization {
     
     public static async register(
         user: user,
-
+        redirectToLogin: () => void,
+        setStatusText: (str: string) => void
     ) {
-        const response = await fetch("/user/register", {
-            method: "POST",
-            headers: new Headers({
-                "Content-Type": "Application/json"
-            }),
-            body: JSON.stringify({
-                username: user.username,
-                password: user.password
-            })
-        })
+        const response = await this.sendCreds(user, "/user/register")
+        if(response.status == 409) {
+            // name taken
+            setStatusText("username is already taken")
+        } else if (response.status != 200) {
+            // unforseen
+        }
+        redirectToLogin()
     }
 }

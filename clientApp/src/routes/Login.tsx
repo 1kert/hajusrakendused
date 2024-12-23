@@ -1,10 +1,11 @@
-import { FormEvent, useState } from "react"
+import { FormEvent, useContext, useState } from "react"
 import Authorization, { user } from "../Authorization"
+import { AppContext } from "../App"
 
 function Login() {
+    const appContext = useContext(AppContext)
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
-    const [token, setToken] = useState<string | null>(null)
     const [loginStatus, setLoginStatus] = useState("")
 
     function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -13,7 +14,7 @@ function Login() {
             username,
             password
         }
-        Authorization.login(user, setToken, setLoginStatus)
+        Authorization.login(user, (str: string) => {appContext.token = str}, setLoginStatus)
     }
     
     function handleUsernameChange(e: React.ChangeEvent<HTMLInputElement>) {

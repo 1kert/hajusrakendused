@@ -9,7 +9,7 @@ namespace hajusrakendused.controllers
 {
     [Route("user")]
     [ApiController]
-    public class AuthController(IConfiguration configuration) : ControllerBase
+    public class AuthController(IConfiguration configuration, DatabaseContext database) : ControllerBase
     {
         private readonly string _jwtKey = configuration["JwtKey"]!;
 
@@ -26,7 +26,7 @@ namespace hajusrakendused.controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] Credentials user)
         {
-            bool userExists = UserService.DoesUserExist(user);
+            bool userExists = UserService.DoesUserExist(user, database);
             if (userExists) return Conflict();
             UserService.AddUserToDatabase(user);
             return Ok();

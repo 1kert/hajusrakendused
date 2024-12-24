@@ -1,5 +1,7 @@
 using System.Text;
+using hajusrakendused.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,9 +10,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 string? jwtKey = builder.Configuration["JwtKey"];
+string? connectionString = builder.Configuration["ConnectionStrings:Default"];
 if(jwtKey == null)
 {
     Console.WriteLine("no jwt key found");
+    return;
+}
+if(connectionString == null)
+{
+    Console.WriteLine("connection string not found");
     return;
 }
 
@@ -27,6 +35,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["JwtKey"]!))
         };
     });
+
+builder.Services.AddDbContext<DatabaseContext>(options => options
+    .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 var app = builder.Build();
 

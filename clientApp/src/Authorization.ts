@@ -28,8 +28,10 @@ export default class Authorization {
         const response = await this.sendCreds(user, "/user/login")
         if (response.status == 401) {
             setLoginStatus("credentials invalid")
+            return
         } else if(response.status != 200) {
             setLoginStatus(":(")
+            return
         }
         const json = await response.json()
         const token = json.token
@@ -47,8 +49,10 @@ export default class Authorization {
         if(response.status == 409) {
             // name taken
             setStatusText("username is already taken")
+            return
         } else if (response.status != 200) {
             // unforseen
+            return
         }
         redirectToLogin()
     }

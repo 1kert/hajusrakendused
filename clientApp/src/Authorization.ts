@@ -23,7 +23,8 @@ export default class Authorization {
     public static async login(
         user: user,
         setToken: (str: string) => void,
-        setLoginStatus: (str: string) => void
+        setLoginStatus: (str: string) => void,
+        redirect: () => void
     ) {
         const response = await this.sendCreds(user, "/user/login")
         if (response.status == 401) {
@@ -37,7 +38,7 @@ export default class Authorization {
         const token = json.token
         setToken(token)
         localStorage.setItem("token", token)
-        setLoginStatus("logged in")
+        redirect()
     }
     
     public static async register(

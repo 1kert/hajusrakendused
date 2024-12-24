@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom"
 import Map from "./routes/Map"
 import Main from "./routes/Main"
 import MainLayout from "./routes/MainLayout"
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext } from "react"
 import Login from "./routes/Login"
 
 export interface appContext {

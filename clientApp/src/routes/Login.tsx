@@ -36,11 +36,12 @@ function Login() {
 
     return (
         <div className="w-full h-full flex justify-center items-center">
-            {loginStatus != "" && <p>{loginStatus}</p>}
-            <form action="" onSubmit={handleSubmit} className="p-16 rounded-2xl bg-slate-400 flex flex-col gap-2">
-                <input type="text" name="username" value={username} onChange={handleUsernameChange} />
-                <input type="password" name="password" value={password} onChange={handlePasswordChange} />
-                <input type="submit" value="askdjsa"/>
+            <form action="" onSubmit={handleSubmit} className="p-10 rounded-2xl bg-slate-400 flex flex-col gap-4 min-w-[400px]">
+                {/* {loginStatus != "" && <p>{loginStatus}</p>} */}
+                <h1 className="text-2xl mb-4 font-bold">Login</h1>
+                <input type="text" name="username" value={username} placeholder="username" className="p-2 rounded-md" onChange={handleUsernameChange} />
+                <input type="password" name="password" value={password} placeholder="password" className="p-2 rounded-md" onChange={handlePasswordChange} />
+                <input type="submit" className="bg-gray-800 text-white rounded-md p-2 cursor-pointer" value="Login"/>
             </form>
         </div>
     )

@@ -6,16 +6,20 @@ import { createContext } from "react"
 import Login from "./routes/Login"
 
 export interface appContext {
-  token: string | null
+  token: string | null,
+  username: string
 }
 
-export const AppContext = createContext<appContext>({
-  token: null
-})
+const initialContext: appContext = {
+  token: null,
+  username: ""
+}
+
+export const AppContext = createContext<appContext>(initialContext)
 
 function App() {
   return (
-    <AppContext.Provider value={{token: null}}>
+    <AppContext.Provider value={initialContext}>
       <BrowserRouter>
         <Routes>
           <Route path="/" Component={MainLayout}>

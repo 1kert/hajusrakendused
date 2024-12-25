@@ -2,6 +2,7 @@ import { FormEvent, useContext, useState } from "react"
 import Authorization, { user } from "../Authorization"
 import { AppContext } from "../App"
 import { useNavigate } from "react-router-dom"
+import TextField from "../components/TextField"
 
 function Login() {
     const appContext = useContext(AppContext)
@@ -25,22 +26,16 @@ function Login() {
             () => navigate("/")
         )
     }
-    
-    function handleUsernameChange(e: React.ChangeEvent<HTMLInputElement>) {
-        setUsername(e.target.value)
-    }
-
-    function handlePasswordChange(e: React.ChangeEvent<HTMLInputElement>) {
-        setPassword(e.target.value)
-    }
 
     return (
         <div className="w-full h-full flex justify-center items-center">
-            <form action="" onSubmit={handleSubmit} className="p-10 rounded-2xl bg-slate-400 flex flex-col gap-4 min-w-[400px]">
-                {/* {loginStatus != "" && <p>{loginStatus}</p>} */}
+            <form action="" onSubmit={handleSubmit} className="p-10 rounded-2xl bg-slate-400 flex flex-col gap-5 min-w-[400px]">
+                {loginStatus != "" && <p>{loginStatus}</p>}
                 <h1 className="text-2xl mb-4 font-bold">Login</h1>
-                <input type="text" name="username" value={username} placeholder="username" className="p-2 rounded-md" onChange={handleUsernameChange} />
-                <input type="password" name="password" value={password} placeholder="password" className="p-2 rounded-md" onChange={handlePasswordChange} />
+                
+                <TextField name="username" id="username" className="" placeholder="username" backgroundColor="bg-slate-400" value={username} setValue={x => setUsername(x)}/>
+                <TextField name="password" id="password" className="" placeholder="password" backgroundColor="bg-slate-400" value={password} setValue={x => setPassword(x)}/>
+
                 <input type="submit" className="bg-gray-800 text-white rounded-md p-2 cursor-pointer" value="Login"/>
             </form>
         </div>

@@ -2,7 +2,6 @@ import { FormEvent, useContext, useState } from "react"
 import Authorization, { user } from "../Authorization"
 import { AppContext } from "../App"
 import { useNavigate } from "react-router-dom"
-import TextField from "../components/TextField"
 
 function Login() {
     const appContext = useContext(AppContext)
@@ -30,11 +29,14 @@ function Login() {
     return (
         <div className="w-full h-full flex justify-center items-center">
             <form action="" onSubmit={handleSubmit} className="p-10 rounded-2xl bg-slate-400 flex flex-col gap-5 min-w-[400px]">
-                {loginStatus != "" && <p>{loginStatus}</p>}
                 <h1 className="text-2xl mb-4 font-bold">Login</h1>
+                {loginStatus != "" && <p className="text-red-800">* {loginStatus}</p>}
                 
-                <TextField name="username" id="username" className="" placeholder="username" backgroundColor="bg-slate-400" value={username} setValue={x => setUsername(x)}/>
-                <TextField name="password" id="password" className="" placeholder="password" backgroundColor="bg-slate-400" value={password} setValue={x => setPassword(x)}/>
+                <label htmlFor="username">username</label>
+                <input type="text" name="username" value={username} onChange={e => setUsername(e.target.value)}/>
+
+                <label htmlFor="password">password</label>
+                <input type="password" name="password" value={password} onChange={e => setPassword(e.target.value)} />
 
                 <input type="submit" className="bg-gray-800 text-white rounded-md p-2 cursor-pointer" value="Login"/>
             </form>

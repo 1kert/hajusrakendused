@@ -32,13 +32,17 @@ function Login() {
                 <h1 className="text-2xl mb-4 font-bold">Login</h1>
                 {loginStatus != "" && <p className="text-red-800">* {loginStatus}</p>}
                 
-                <label htmlFor="username">username</label>
-                <input type="text" name="username" value={username} onChange={e => setUsername(e.target.value)}/>
+                <div className="flex flex-col gap-2">
+                    <label htmlFor="username">username</label>
+                    <input type="text" name="username" value={username} onChange={e => setUsername(e.target.value)}/>
+                </div>
 
-                <label htmlFor="password">password</label>
-                <input type="password" name="password" value={password} onChange={e => setPassword(e.target.value)} />
+                <div className="flex flex-col gap-2">
+                    <label htmlFor="password">password</label>
+                    <input type="password" name="password" value={password} onChange={e => setPassword(e.target.value)} />
+                </div>
 
-                <input type="submit" className="bg-gray-800 text-white rounded-md p-2 cursor-pointer" value="Login"/>
+                <input type="submit" className="bg-gray-800 text-white rounded-md p-2 cursor-pointer mt-4" value="Login"/>
             </form>
         </div>
     )

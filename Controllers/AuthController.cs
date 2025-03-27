@@ -2,7 +2,6 @@ using System.Security.Claims;
 using hajusrakendused.Models;
 using hajusrakendused.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,28 +14,41 @@ namespace hajusrakendused.controllers
         UserManager<IdentityUser> userManager
     ) : ControllerBase
     {
-        private readonly IConfiguration _configuration = configuration;
-        private readonly UserManager<IdentityUser> _userManager = userManager;
-
+        private const string UnauthorizedMessage = "Invalid username or password.";
+        private const string BadRequestMessage = "Malformed request.";
+        
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            var user = await _userManager.FindByNameAsync(model.Username);
-            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
+            if (model.Username == null || model.Password == null) return BadRequest(new
+            {
+                Content = BadRequestMessage
+            });
+            
+            var user = await userManager.FindByNameAsync(model.Username);
+            if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
             {
                 return Ok(new
                 {
-                    token = AuthService.GenerateJwtToken(model.Username, _configuration["JwtKey"]!)
+                    token = Authorization.GenerateJwtToken(model.Username, configuration["JwtKey"]!)
                 });
             }
-            return Unauthorized();
+            return Unauthorized(new
+            {
+                Content = UnauthorizedMessage
+            });
         }
         
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] LoginModel model)
         {
+            if (model.Username == null || model.Password == null) return BadRequest(new
+            {
+                Content = BadRequestMessage
+            });
+            
             IdentityUser user = new() { UserName = model.Username };
-            IdentityResult result = await _userManager.CreateAsync(user, model.Password);
+            IdentityResult result = await userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
                 return Ok(new

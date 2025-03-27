@@ -41,7 +41,7 @@ function Login() {
                     <label htmlFor="password">password</label>
                     <input type="password" name="password" value={password} onChange={e => setPassword(e.target.value)} />
                 </div>
-
+                
                 <input type="submit" className="bg-gray-800 text-white rounded-md p-2 cursor-pointer mt-4" value="Login"/>
             </form>
         </div>

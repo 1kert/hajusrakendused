@@ -1,0 +1,25 @@
+### bad model login request
+POST localhost:5000/user/login
+Content-Type: application/json
+
+{
+  "Username": "asd"
+}
+
+### good model incorrect login
+POST localhost:5000/user/login
+Content-Type: application/json
+
+{
+  "Username": "asd",
+  "Password": "aslkdjsalkd"
+}
+
+### good model correct login
+POST localhost:5000/user/login
+Content-Type: application/json
+
+{
+  "Username": "test",
+  "Password": "testtest"
+}

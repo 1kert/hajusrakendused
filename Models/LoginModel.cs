@@ -2,6 +2,6 @@ namespace hajusrakendused.Models;
 
 public class LoginModel
 {
-    public required string Username { get; set; }
-    public required string Password { get; set; }
+    public string? Username { get; init; }
+    public string? Password { get; init; }
 }

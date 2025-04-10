@@ -1,5 +1,5 @@
 import { FormEvent, useContext, useState } from "react"
-import Authorization, { user } from "../Authorization"
+import AuthRepository, { user } from "../repositories/AuthRepository.ts"
 import { AppContext } from "../App"
 import { useNavigate } from "react-router-dom"
 
@@ -18,7 +18,7 @@ function LoginScreen() {
             password
         }
 
-        Authorization.login(
+        AuthRepository.login(
             user,
             (str: string) => {appContext.token = str},
             setLoginStatus,

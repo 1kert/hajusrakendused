@@ -1,0 +1,2 @@
+### get all markers
+GET localhost:5000/map/getmarkers

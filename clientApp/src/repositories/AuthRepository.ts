@@ -3,11 +3,11 @@ export interface user {
     password: string
 }
 
-export default class Authorization {
-    static async sendCreds(
+export default class AuthRepository {
+    static async sendCredentials(
         user: user,
         endpoint: string
-    ): Promise<Response> {
+    ): Promise<Response> { // todo: move to axios
         return await fetch(endpoint, {
             method: "POST",
             body: JSON.stringify({
@@ -26,7 +26,7 @@ export default class Authorization {
         setLoginStatus: (str: string) => void,
         redirect: () => void
     ) {
-        const response = await this.sendCreds(user, "/user/login")
+        const response = await this.sendCredentials(user, "/user/login")
         if (response.status == 401) {
             setLoginStatus("credentials invalid")
             return
@@ -46,13 +46,13 @@ export default class Authorization {
         redirectToLogin: () => void,
         setStatusText: (str: string) => void
     ) {
-        const response = await this.sendCreds(user, "/user/register")
+        const response = await this.sendCredentials(user, "/user/register")
         if(response.status == 409) {
             // name taken
             setStatusText("username is already taken")
             return
         } else if (response.status != 200) {
-            // unforseen
+            // unforeseen
             return
         }
         redirectToLogin()

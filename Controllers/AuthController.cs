@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace hajusrakendused.controllers
 {
-    [Route("user")]
+    [Route("api/auth")]
     [ApiController]
     public class AuthController(
         IConfiguration configuration,

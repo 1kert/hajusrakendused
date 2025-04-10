@@ -28,7 +28,6 @@ function MapScreen() {
     }, [])
 
     return (
-        // todo: add popup when clicked that asks for title and desc
         <div>
             {isMapVisible && <MarkerAddPopup onClose={() => setIsMapVisible(false)} />}
             <div id="map" className="w-full h-[400px]" />

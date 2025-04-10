@@ -3,7 +3,7 @@ import Authorization, { user } from "../Authorization"
 import { AppContext } from "../App"
 import { useNavigate } from "react-router-dom"
 
-function Login() {
+function LoginScreen() {
     const appContext = useContext(AppContext)
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
@@ -48,4 +48,4 @@ function Login() {
     )
 }
 
-export default Login
+export default LoginScreen

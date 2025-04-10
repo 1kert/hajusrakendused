@@ -1,9 +1,9 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom"
-import Map from "./routes/Map"
+import MapScreen from "./routes/MapScreen.tsx"
 import Main from "./routes/Main"
 import MainLayout from "./routes/MainLayout"
 import { createContext } from "react"
-import Login from "./routes/Login"
+import LoginScreen from "./routes/LoginScreen.tsx"
 
 export interface appContext {
   token: string | null,
@@ -24,8 +24,8 @@ function App() {
         <Routes>
           <Route path="/" Component={MainLayout}>
             <Route index Component={Main} />
-            <Route path="/map" Component={Map} />
-            <Route path="/login" Component={Login} />
+            <Route path="/map" Component={MapScreen} />
+            <Route path="/login" Component={LoginScreen} />
           </Route>
         </Routes>
       </BrowserRouter>

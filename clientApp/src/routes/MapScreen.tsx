@@ -5,7 +5,7 @@ import MarkerAddPopup from "../components/MarkerAddPopup.tsx";
 import MarkerRepository, {Marker} from "../repositories/MarkerRepository.ts";
 
 function MapScreen() {
-    const [isMapVisible, setIsMapVisible] = useState<boolean>(false)
+    const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false)
     const [allMarkers, setAllMarkers] = useState<Marker[]>([])
     
     async function getAllMarkers() {
@@ -14,11 +14,6 @@ function MapScreen() {
     }
     
     useEffect(() => {
-        // TODO get map markers
-        Radar.initialize("prj_live_pk_7a98b00dfd090c2938b71f3908bac856ec6393be");
-            
-        getAllMarkers().catch(console.error);
-
         const map = Radar.ui.map({
             container: "map",
             style: "radar-default-v1",
@@ -26,20 +21,29 @@ function MapScreen() {
             zoom: 6
         })
 
-        Radar.ui.marker({ text: 'Radar HQ' }).setLngLat([-73.9910078, 40.7342465]).addTo(map);
-        
+        Radar.ui.marker({ text: 'Radar HQ' }).setLngLat([-73.9910078, 40.7342465]).addTo(map)
+        allMarkers.forEach((element: Marker) => {
+            if (element.longitude == null || element.latitude == null) return
+            Radar.ui.marker({ text: element.title ?? "null" }).setLngLat([element.longitude, element.latitude]).addTo(map)
+        }) 
+
         map.on("click", () => {
-            setIsMapVisible(true)
+            setIsPopupVisible(true)
         })
 
         return () => {
             map.remove()
         }
+    }, [allMarkers])
+    
+    useEffect(() => {
+        Radar.initialize("prj_live_pk_7a98b00dfd090c2938b71f3908bac856ec6393be");
+        getAllMarkers().catch(console.error);
     }, [])
 
     return (
         <div>
-            {isMapVisible && <MarkerAddPopup onClose={() => setIsMapVisible(false)} />}
+            {isPopupVisible && <MarkerAddPopup onClose={() => setIsPopupVisible(false)} />}
             {allMarkers.map((marker) => 
                 <p>{marker.title}</p>
             )}

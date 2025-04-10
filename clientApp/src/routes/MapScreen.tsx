@@ -82,7 +82,7 @@ function MapScreen() {
                 onClose={() => setIsPopupVisible(false)} 
                 onSubmit={onMarkerSubmit}
             />}
-            <div id="map" className="w-full h-[400px]" />
+            <div id="map" className="w-full h-screen" />
         </div>
     )
 }

@@ -1,6 +1,6 @@
-namespace hajusrakendused.Models;
+namespace hajusrakendused.Models.http;
 
-public class LoginModel
+public class LoginRequest
 {
     public string? Username { get; init; }
     public string? Password { get; init; }

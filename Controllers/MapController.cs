@@ -1,5 +1,6 @@
 using System.Text.Json;
 using hajusrakendused.Models;
+using hajusrakendused.Models.http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace hajusrakendused.controllers
@@ -8,7 +9,7 @@ namespace hajusrakendused.controllers
     [ApiController]
     public class MapController : ControllerBase
     {
-        private static readonly List<MarkerResponse> Markers = [];
+        private static readonly List<MarkerRequest> Markers = [];
         
         [HttpGet("get-markers")]
         public IActionResult GetMarkers()
@@ -17,14 +18,14 @@ namespace hajusrakendused.controllers
         }
 
         [HttpPost("create-marker")]
-        public IActionResult CreateMarker([FromBody] MarkerResponse marker)
+        public IActionResult CreateMarker([FromBody] MarkerRequest marker)
         {
             string title = marker.Title?.Trim() ?? "";
             string description = marker.Description?.Trim() ?? "";
             if (marker.Longitude == null || marker.Latitude == null) return BadRequest();
             if (title.Length == 0 || description.Length == 0) return BadRequest();
 
-            Markers.Add(new MarkerResponse
+            Markers.Add(new MarkerRequest
             {
                 Title = title,
                 Description = description,

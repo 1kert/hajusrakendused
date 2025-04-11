@@ -77,12 +77,12 @@ function MapScreen() {
     // todo: custom popup for markers
 
     return (
-        <div>
+        <div className="w-full h-full">
             {isPopupVisible && <MarkerAddPopup 
                 onClose={() => setIsPopupVisible(false)} 
                 onSubmit={onMarkerSubmit}
             />}
-            <div id="map" className="w-full h-screen" />
+            <div id="map" className="w-full h-full" />
         </div>
     )
 }

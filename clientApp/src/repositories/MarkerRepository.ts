@@ -4,13 +4,14 @@ export interface Marker {
     title: string | null,
     description: string | null,
     latitude: number | null,
-    longitude: number | null
+    longitude: number | null,
+    userId: number | null
 }
 
 export default class MarkerRepository {
     static async getAllMarkers(): Promise<Marker[]> {
         const response = await axios.get("/api/map/get-markers")
-        return response.data.markers;
+        return response.data;
     }
     
     static async createMarker(

@@ -1,2 +1,14 @@
 ### get all markers
 GET localhost:5000/map/getmarkers
+
+### create marker
+POST localhost:5000/api/map/create-marker
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InNvbWV1c2VyIiwic3ViIjoiMjk0MjY2YTUtOWIwYS00MWFlLTkxYmUtNDI3YjAwY2EyZDRhIiwibmJmIjoxNzQ0MzkyNDc5LCJleHAiOjE3NDQzOTYwNzksImlhdCI6MTc0NDM5MjQ3OSwiaXNzIjoiZHVubm8iLCJhdWQiOiJkdW5ubyJ9.fOL_l0W8P5MXWtlcMt5vMIACoi7MjCBYvlZcaLZx0tE
+
+{
+  "title": "testing",
+  "description": "africa",
+  "latitude": 10,
+  "longitude": 0.0
+}

@@ -9,9 +9,8 @@ import {AppContext} from "../App.tsx";
 import LoginScreen from "./LoginScreen.tsx";
 
 export default function MapScreen() {
-    const authContext = useContext(AppContext)
-    
-    if (authContext.token == null) return <LoginScreen />
+    const appContext = useContext(AppContext)
+    if (appContext.token == null) return <LoginScreen />
     
     const [radarMap, setRadarMap] = useState<RadarMap | null>(null)
     const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false)
@@ -28,7 +27,7 @@ export default function MapScreen() {
     useEffect(() => {
         if (radarMap == null) return;
         
-        allMarkers.forEach((element: Marker) => {
+        allMarkers?.forEach((element: Marker) => {
             if (element.longitude == null || element.latitude == null) return
             // todo: different marker colors for self and others
             Radar.ui.marker({ 
@@ -78,12 +77,13 @@ export default function MapScreen() {
             title: title,
             description: desc,
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            userId: null
         }
         
         await MarkerRepository.createMarker(
             marker,
-            "test"
+            appContext.token!
         )
         
         setAllMarkers(await MarkerRepository.getAllMarkers())

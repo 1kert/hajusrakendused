@@ -7,19 +7,21 @@ namespace hajusrakendused.Services;
 
 public class Authorization
 {
-    public static string GenerateJwtToken(string username, string keyStr)
+    public static string GenerateJwtToken(string username, string userId, string keyStr)
     {
         var claims = new ClaimsIdentity();
-        claims.AddClaim(new(ClaimTypes.Name, username));
+        claims.AddClaim(new Claim(ClaimTypes.Name, username));
+        claims.AddClaim(new Claim(ClaimTypes.NameIdentifier, userId));
+        
         var handler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(keyStr);
-        var creds = new SigningCredentials(
+        var credentials = new SigningCredentials(
             new SymmetricSecurityKey(key),
             SecurityAlgorithms.HmacSha256
         );
         var tokenDescriptor = new SecurityTokenDescriptor()
         {
-            SigningCredentials = creds,
+            SigningCredentials = credentials,
             Subject = claims,
             Expires = DateTime.UtcNow.AddHours(1),
             Issuer = "dunno",

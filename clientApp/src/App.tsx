@@ -17,16 +17,12 @@ const initialContext: appContext = {
 
 export const AppContext = createContext<appContext>(initialContext)
 
-function handleError(err: Error) {
-  console.log(`error: ${err}`)
-}
-
 function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem("token"))
   
   return (
     <AppContext.Provider value={{token, setToken}}>
-      <ErrorBoundary fallback={<p>error</p>} onError={handleError} >
+      <ErrorBoundary fallback={<p>error</p>} onError={(e) => console.error(e)} >
         <BrowserRouter>
           <Routes>
             <Route path="/" Component={MainLayout}>

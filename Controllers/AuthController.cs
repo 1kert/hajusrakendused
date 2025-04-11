@@ -31,7 +31,7 @@ namespace hajusrakendused.controllers
             {
                 return Ok(new
                 {
-                    token = Authorization.GenerateJwtToken(request.Username, configuration["JwtKey"]!)
+                    token = Authorization.GenerateJwtToken(request.Username, user.Id, configuration["JwtKey"]!)
                 });
             }
             return Unauthorized(new

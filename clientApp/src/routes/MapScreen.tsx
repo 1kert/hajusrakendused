@@ -4,8 +4,9 @@ import 'radar-sdk-js/dist/radar.css';
 import MarkerAddPopup from "../components/MarkerAddPopup.tsx";
 import MarkerRepository, {Marker} from "../repositories/MarkerRepository.ts";
 import RadarMap from "radar-sdk-js/dist/ui/RadarMap";
+import {renderToString} from "react-dom/server";
 
-function MapScreen() {
+export default function MapScreen() {
     const [radarMap, setRadarMap] = useState<RadarMap | null>(null)
     const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false)
     const [allMarkers, setAllMarkers] = useState<Marker[]>([])
@@ -23,7 +24,15 @@ function MapScreen() {
         
         allMarkers.forEach((element: Marker) => {
             if (element.longitude == null || element.latitude == null) return
-            Radar.ui.marker({ text: element.title ?? "null" }).setLngLat([element.longitude, element.latitude]).addTo(radarMap)
+            Radar.ui.marker({ 
+                popup: {
+                    html: renderToString(
+                        <CustomPopup text={element.title} description={element.description}/>
+                    )
+                }
+            })
+                .setLngLat([element.longitude, element.latitude])
+                .addTo(radarMap)
         }) 
         
         return () => {
@@ -74,8 +83,7 @@ function MapScreen() {
     }
     
     // todo: display desc for markers
-    // todo: custom popup for markers
-
+    
     return (
         <div className="w-full h-full">
             {isPopupVisible && <MarkerAddPopup 
@@ -87,4 +95,16 @@ function MapScreen() {
     )
 }
 
-export default MapScreen
+function CustomPopup(
+    props: {
+        text: string | null,
+        description: string | null
+    }
+) {
+    return ( // todo: should look less trash
+        <div className="flex flex-col gap-2">
+            <h1 className="text-xl font-bold">{props.text}</h1>
+            <p className="text-lg">{props.description}</p>
+        </div>
+    )
+}

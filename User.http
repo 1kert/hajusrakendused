@@ -1,5 +1,5 @@
 ### bad model login request
-POST localhost:5000/user/login
+POST localhost:5000/api/auth/login
 Content-Type: application/json
 
 {
@@ -7,7 +7,7 @@ Content-Type: application/json
 }
 
 ### good model incorrect login
-POST localhost:5000/user/login
+POST localhost:5000/api/auth/login
 Content-Type: application/json
 
 {
@@ -16,10 +16,19 @@ Content-Type: application/json
 }
 
 ### good model correct login
-POST localhost:5000/user/login
+POST localhost:5000/api/auth/login
 Content-Type: application/json
 
 {
-  "Username": "test",
-  "Password": "testtest"
+  "Username": "someuser",
+  "Password": "someuser"
+}
+
+### register new user
+POST localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "Username": "someuser",
+  "Password": "someuser"
 }

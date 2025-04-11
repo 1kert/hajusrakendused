@@ -23,10 +23,9 @@ export default class AuthRepository {
     public static async login(
         user: user,
         setToken: (str: string) => void,
-        setLoginStatus: (str: string) => void,
-        redirect: () => void
+        setLoginStatus: (str: string) => void
     ) {
-        const response = await this.sendCredentials(user, "/user/login")
+        const response = await this.sendCredentials(user, "/api/auth/login")
         if (response.status == 401) {
             setLoginStatus("credentials invalid")
             return
@@ -38,7 +37,6 @@ export default class AuthRepository {
         const token = json.token
         setToken(token)
         localStorage.setItem("token", token)
-        redirect()
     }
     
     public static async register(
@@ -46,7 +44,7 @@ export default class AuthRepository {
         redirectToLogin: () => void,
         setStatusText: (str: string) => void
     ) {
-        const response = await this.sendCredentials(user, "/user/register")
+        const response = await this.sendCredentials(user, "/api/auth/register")
         if(response.status == 409) {
             // name taken
             setStatusText("username is already taken")

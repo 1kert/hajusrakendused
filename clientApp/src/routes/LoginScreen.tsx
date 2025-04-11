@@ -1,14 +1,12 @@
-import { FormEvent, useContext, useState } from "react"
+import {FormEvent, useContext, useState} from "react"
 import AuthRepository, { user } from "../repositories/AuthRepository.ts"
 import { AppContext } from "../App"
-import { useNavigate } from "react-router-dom"
 
 function LoginScreen() {
     const appContext = useContext(AppContext)
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [loginStatus, setLoginStatus] = useState("")
-    const navigate = useNavigate()
 
     function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -20,9 +18,8 @@ function LoginScreen() {
 
         AuthRepository.login(
             user,
-            (str: string) => {appContext.token = str},
+            (str: string) => { appContext.setToken(str) },
             setLoginStatus,
-            () => navigate("/")
         )
     }
 

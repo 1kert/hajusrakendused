@@ -1,12 +1,18 @@
-import {useEffect, useState} from "react"
+import {useContext, useEffect, useState} from "react"
 import Radar from "radar-sdk-js"
 import 'radar-sdk-js/dist/radar.css';
 import MarkerAddPopup from "../components/MarkerAddPopup.tsx";
 import MarkerRepository, {Marker} from "../repositories/MarkerRepository.ts";
 import RadarMap from "radar-sdk-js/dist/ui/RadarMap";
 import {renderToString} from "react-dom/server";
+import {AppContext} from "../App.tsx";
+import LoginScreen from "./LoginScreen.tsx";
 
 export default function MapScreen() {
+    const authContext = useContext(AppContext)
+    
+    if (authContext.token == null) return <LoginScreen />
+    
     const [radarMap, setRadarMap] = useState<RadarMap | null>(null)
     const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false)
     const [allMarkers, setAllMarkers] = useState<Marker[]>([])
@@ -24,6 +30,7 @@ export default function MapScreen() {
         
         allMarkers.forEach((element: Marker) => {
             if (element.longitude == null || element.latitude == null) return
+            // todo: different marker colors for self and others
             Radar.ui.marker({ 
                 popup: {
                     html: renderToString(

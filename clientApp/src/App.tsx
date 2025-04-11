@@ -2,18 +2,17 @@ import { BrowserRouter, Route, Routes } from "react-router-dom"
 import MapScreen from "./routes/MapScreen.tsx"
 import Main from "./routes/Main"
 import MainLayout from "./routes/MainLayout"
-import { createContext } from "react"
-import LoginScreen from "./routes/LoginScreen.tsx"
+import {createContext, useState} from "react"
 import {ErrorBoundary} from "react-error-boundary";
 
 export interface appContext {
   token: string | null,
-  username: string
+  setToken: (token: string) => void,
 }
 
 const initialContext: appContext = {
   token: null,
-  username: ""
+  setToken: () => {},
 }
 
 export const AppContext = createContext<appContext>(initialContext)
@@ -23,15 +22,16 @@ function handleError(err: Error) {
 }
 
 function App() {
+  const [token, setToken] = useState<string | null>(null)
+  
   return (
-    <AppContext.Provider value={initialContext}>
+    <AppContext.Provider value={{token, setToken}}>
       <ErrorBoundary fallback={<p>error</p>} onError={handleError} >
         <BrowserRouter>
           <Routes>
             <Route path="/" Component={MainLayout}>
               <Route index Component={Main} />
               <Route path="/map" Component={MapScreen} />
-              <Route path="/login" Component={LoginScreen} />
             </Route>
           </Routes>
         </BrowserRouter>

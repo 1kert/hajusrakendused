@@ -4,19 +4,29 @@ import 'radar-sdk-js/dist/radar.css';
 import MarkerAddDialog from "../components/MarkerAddDialog.tsx";
 import MarkerRepository, {Marker} from "../repositories/MarkerRepository.ts";
 import RadarMap from "radar-sdk-js/dist/ui/RadarMap";
-import {renderToString} from "react-dom/server";
 import {AppContext} from "../App.tsx";
 import LoginScreen from "./LoginScreen.tsx";
+
+interface AddDialogData {
+    latitude: number
+    longitude: number
+}
+
+interface MarkerDialogData {
+    id: number
+    name: string
+    description: string
+    canEdit: boolean
+}
 
 export default function MapScreen() {
     const appContext = useContext(AppContext)
     if (appContext.token == null) return <LoginScreen />
     
     const [radarMap, setRadarMap] = useState<RadarMap | null>(null)
-    const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false)
+    const [addDialogData, setAddDialogData] = useState<AddDialogData | null>(null)
+    const [markerDialogData, setMarkerDialogData] = useState<MarkerDialogData | null>(null)
     const [allMarkers, setAllMarkers] = useState<Marker[]>([])
-    const [latitude, setLatitude] = useState<number>(0)
-    const [longitude, setLongitude] = useState<number>(0)
     
     async function getAllMarkers() {
         // todo: update every 5 sec or websocket?
@@ -27,17 +37,12 @@ export default function MapScreen() {
     useEffect(() => {
         if (radarMap == null) return;
         
-        allMarkers?.forEach((element: Marker) => {
-            if (element.longitude == null || element.latitude == null) return
+        allMarkers?.forEach((marker: Marker) => {
+            if (marker.longitude == null || marker.latitude == null) return
             // todo: different marker colors for self and others
-            Radar.ui.marker({ 
-                popup: {
-                    html: renderToString(
-                        <CustomMarkerPopup text={element.title} description={element.description}/>
-                    )
-                }
-            })
-                .setLngLat([element.longitude, element.latitude])
+            Radar.ui.marker()
+                .setLngLat([marker.longitude, marker.latitude])
+                .on("click", () => { console.log("marker clicked") })
                 .addTo(radarMap)
         }) 
         
@@ -57,9 +62,10 @@ export default function MapScreen() {
         })
 
         map.on("click", (e) => {
-            setLatitude(e.lngLat.lat)
-            setLongitude(e.lngLat.lng)
-            setIsPopupVisible(true)
+            setAddDialogData({
+                latitude: e.lngLat.lat, 
+                longitude: e.lngLat.lng,
+            })
         })
 
         setRadarMap(map)
@@ -73,12 +79,17 @@ export default function MapScreen() {
         title: string,
         desc: string
     ) {
+        const latitude = addDialogData?.latitude
+        const longitude = addDialogData?.longitude
+        if (latitude === undefined || longitude === undefined) throw new Error("submitted lngLat is required")
+        
         const marker: Marker = {
             title: title,
             description: desc,
             latitude: latitude,
             longitude: longitude,
-            userId: null
+            id: 0,
+            isOwn: false,
         }
         
         await MarkerRepository.createMarker(
@@ -94,24 +105,10 @@ export default function MapScreen() {
     
     return (
         <div className="w-full h-full">
-            <MarkerAddDialog isPopupVisible={isPopupVisible}
-                             onClose={() => setIsPopupVisible(false)}
+            <MarkerAddDialog isPopupVisible={addDialogData !== null}
+                             onClose={() => setAddDialogData(null)}
                              onSubmit={onMarkerSubmit}/>
             <div id="map" className="w-full h-full" />
-        </div>
-    )
-}
-
-function CustomMarkerPopup(
-    props: {
-        text: string | null,
-        description: string | null
-    }
-) {
-    return ( // todo: should look less trash
-        <div className="flex flex-col gap-2">
-            <h1 className="text-xl font-bold">{props.text}</h1>
-            <p className="text-lg">{props.description}</p>
         </div>
     )
 }

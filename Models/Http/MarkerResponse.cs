@@ -2,6 +2,7 @@ namespace hajusrakendused.Models.http;
 
 public class MarkerResponse
 {
+    public required int Id { get; init; }
     public required string Title { get; init; }
     public required string Description { get; init; }
     public required double Latitude { get; init; }

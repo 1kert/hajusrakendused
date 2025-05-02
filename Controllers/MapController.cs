@@ -23,6 +23,7 @@ namespace hajusrakendused.controllers
             var allMarkers = await markerRepository.GetAllMarkersAsync();
             var response = allMarkers.Select(marker => new MarkerResponse
             {
+                Id = marker.Id,
                 Title = marker.Title,
                 Description = marker.Description,
                 Latitude = marker.Latitude,

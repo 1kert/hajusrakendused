@@ -1,11 +1,12 @@
 import axios from "axios";
 
 export interface Marker {
+    id: number
     title: string | null,
     description: string | null,
     latitude: number | null,
     longitude: number | null,
-    userId: number | null
+    isOwn: boolean
 }
 
 export default class MarkerRepository {

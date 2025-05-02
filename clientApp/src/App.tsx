@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import MapScreen from "./routes/MapScreen.tsx"
-import Main from "./routes/Main"
+import HomeScreen from "./routes/HomeScreen.tsx"
 import MainLayout from "./routes/MainLayout"
 import {createContext, useState} from "react"
 import {ErrorBoundary} from "react-error-boundary";
@@ -26,7 +26,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" Component={MainLayout}>
-              <Route index Component={Main} />
+              <Route index Component={HomeScreen} />
               <Route path="/map" Component={MapScreen} />
             </Route>
           </Routes>

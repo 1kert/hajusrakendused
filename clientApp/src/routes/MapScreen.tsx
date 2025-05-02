@@ -119,6 +119,7 @@ export default function MapScreen() {
                           description={markerDialogData?.description ?? ""}
                           author={"some guy"} // todo: show author
                           updateDate={"10 years ago"} // todo: show update date
+                          canEdit={markerDialogData?.canEdit ?? false}
                           onClose={() => setMarkerDialogData(null)}/>
             <div id="map" className="w-full h-full" />
         </div>

@@ -6,6 +6,7 @@ import MarkerRepository, {Marker} from "../repositories/MarkerRepository.ts";
 import RadarMap from "radar-sdk-js/dist/ui/RadarMap";
 import {AppContext} from "../App.tsx";
 import LoginScreen from "./LoginScreen.tsx";
+import MarkerDialog from "../components/MarkerDialog.tsx";
 
 interface AddDialogData {
     latitude: number
@@ -14,7 +15,7 @@ interface AddDialogData {
 
 interface MarkerDialogData {
     id: number
-    name: string
+    title: string
     description: string
     canEdit: boolean
 }
@@ -42,7 +43,12 @@ export default function MapScreen() {
             // todo: different marker colors for self and others
             Radar.ui.marker()
                 .setLngLat([marker.longitude, marker.latitude])
-                .on("click", () => { console.log("marker clicked") })
+                .on("click", () => { setMarkerDialogData({
+                    id: marker.id,
+                    title: marker.title,
+                    description: marker.description,
+                    canEdit: marker.isOwn
+                }) })
                 .addTo(radarMap)
         }) 
         
@@ -105,9 +111,15 @@ export default function MapScreen() {
     
     return (
         <div className="w-full h-full">
-            <MarkerAddDialog isPopupVisible={addDialogData !== null}
+            <MarkerAddDialog isVisible={addDialogData !== null}
                              onClose={() => setAddDialogData(null)}
                              onSubmit={onMarkerSubmit}/>
+            <MarkerDialog isVisible={markerDialogData !== null}
+                          title={markerDialogData?.title ?? ""}
+                          description={markerDialogData?.description ?? ""}
+                          author={"some guy"} // todo: show author
+                          updateDate={"10 years ago"} // todo: show update date
+                          onClose={() => setMarkerDialogData(null)}/>
             <div id="map" className="w-full h-full" />
         </div>
     )

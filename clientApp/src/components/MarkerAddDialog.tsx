@@ -4,7 +4,7 @@ import {Button} from "./ui/button.tsx";
 
 export default function MarkerAddDialog(
     props: {
-        isPopupVisible: boolean,
+        isVisible: boolean,
         onClose: () => void,
         onSubmit: (title: string, desc: string) => void
     }
@@ -22,7 +22,7 @@ export default function MarkerAddDialog(
     // todo: field validation
     
     return (
-        <Dialog open={props.isPopupVisible} onOpenChange={open => { if(!open) props.onClose() }}>
+        <Dialog open={props.isVisible} onOpenChange={open => { if(!open) props.onClose() }}>
             <DialogContent>
                 <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
                     <DialogHeader>

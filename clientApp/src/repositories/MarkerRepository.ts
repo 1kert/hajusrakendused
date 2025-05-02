@@ -2,10 +2,10 @@ import axios from "axios";
 
 export interface Marker {
     id: number
-    title: string | null,
-    description: string | null,
-    latitude: number | null,
-    longitude: number | null,
+    title: string,
+    description: string,
+    latitude: number,
+    longitude: number,
     isOwn: boolean
 }
 

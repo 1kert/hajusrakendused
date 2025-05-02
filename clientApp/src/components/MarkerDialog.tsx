@@ -1,5 +1,6 @@
 import {Dialog, DialogContent, DialogHeader} from "./ui/dialog.tsx";
 import ic_edit from "../assets/ic_edit.svg"
+import {useState} from "react";
 
 export default function MarkerDialog(
     props: {
@@ -12,6 +13,8 @@ export default function MarkerDialog(
         onClose: () => void
     }
 ) {
+    const [isEditing, setIsEditing] = useState<boolean>(false)
+    
     return (
         <Dialog open={props.isVisible} onOpenChange={open => { if(!open) props.onClose() }}>
             <DialogContent>

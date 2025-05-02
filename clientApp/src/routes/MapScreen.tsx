@@ -25,9 +25,14 @@ export default function MapScreen() {
     if (appContext.token == null) return <LoginScreen />
     
     const [radarMap, setRadarMap] = useState<RadarMap | null>(null)
-    const [addDialogData, setAddDialogData] = useState<AddDialogData | null>(null)
-    const [markerDialogData, setMarkerDialogData] = useState<MarkerDialogData | null>(null)
     const [allMarkers, setAllMarkers] = useState<Marker[]>([])
+    
+    const [addDialogData, setAddDialogData] = useState<AddDialogData>()
+    const [isAddDialogVisible, setIsAddDialogVisible] = useState<boolean>(false)
+    
+    const [markerDialogData, setMarkerDialogData] = useState<MarkerDialogData | null>(null)
+    const [isMarkerDialogVisible, setIsMarkerDialogVisible] = useState<boolean>(false)
+    
     
     async function getAllMarkers() {
         // todo: update every 5 sec or websocket?
@@ -43,12 +48,15 @@ export default function MapScreen() {
             // todo: different marker colors for self and others
             Radar.ui.marker()
                 .setLngLat([marker.longitude, marker.latitude])
-                .on("click", () => { setMarkerDialogData({
-                    id: marker.id,
-                    title: marker.title,
-                    description: marker.description,
-                    canEdit: marker.isOwn
-                }) })
+                .on("click", () => {
+                    setMarkerDialogData({
+                        id: marker.id,
+                        title: marker.title,
+                        description: marker.description,
+                        canEdit: marker.isOwn
+                    })
+                    setIsMarkerDialogVisible(true)
+                })
                 .addTo(radarMap)
         }) 
         
@@ -72,6 +80,7 @@ export default function MapScreen() {
                 latitude: e.lngLat.lat, 
                 longitude: e.lngLat.lng,
             })
+            setIsAddDialogVisible(true)
         })
 
         setRadarMap(map)
@@ -111,16 +120,16 @@ export default function MapScreen() {
     
     return (
         <div className="w-full h-full">
-            <MarkerAddDialog isVisible={addDialogData !== null}
-                             onClose={() => setAddDialogData(null)}
+            <MarkerAddDialog isVisible={isAddDialogVisible}
+                             onClose={() => setIsAddDialogVisible(false)}
                              onSubmit={onMarkerSubmit}/>
-            <MarkerDialog isVisible={markerDialogData !== null}
+            <MarkerDialog isVisible={isMarkerDialogVisible}
                           title={markerDialogData?.title ?? ""}
                           description={markerDialogData?.description ?? ""}
                           author={"some guy"} // todo: show author
                           updateDate={"10 years ago"} // todo: show update date
                           canEdit={markerDialogData?.canEdit ?? false}
-                          onClose={() => setMarkerDialogData(null)}/>
+                          onClose={() => setIsMarkerDialogVisible(false)}/>
             <div id="map" className="w-full h-full" />
         </div>
     )

@@ -19,11 +19,11 @@ public class Authorization
             new SymmetricSecurityKey(key),
             SecurityAlgorithms.HmacSha256
         );
-        var tokenDescriptor = new SecurityTokenDescriptor()
+        var tokenDescriptor = new SecurityTokenDescriptor
         {
             SigningCredentials = credentials,
             Subject = claims,
-            Expires = DateTime.UtcNow.AddHours(1),
+            Expires = DateTime.UtcNow.AddDays(7), // todo: change time back
             Issuer = "dunno",
             Audience = "dunno"
         };

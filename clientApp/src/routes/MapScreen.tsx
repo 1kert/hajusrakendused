@@ -1,7 +1,7 @@
 import {useContext, useEffect, useState} from "react"
 import Radar from "radar-sdk-js"
 import 'radar-sdk-js/dist/radar.css';
-import MarkerAddPopup from "../components/MarkerAddPopup.tsx";
+import MarkerAddDialog from "../components/MarkerAddDialog.tsx";
 import MarkerRepository, {Marker} from "../repositories/MarkerRepository.ts";
 import RadarMap from "radar-sdk-js/dist/ui/RadarMap";
 import {renderToString} from "react-dom/server";
@@ -33,7 +33,7 @@ export default function MapScreen() {
             Radar.ui.marker({ 
                 popup: {
                     html: renderToString(
-                        <CustomPopup text={element.title} description={element.description}/>
+                        <CustomMarkerPopup text={element.title} description={element.description}/>
                     )
                 }
             })
@@ -90,18 +90,19 @@ export default function MapScreen() {
     }
     
     // todo: display desc for markers
+    // todo: loading after adding marker
     
     return (
         <div className="w-full h-full">
-            <MarkerAddPopup isPopupVisible={isPopupVisible}
-                            onClose={() => setIsPopupVisible(false)}
-                            onSubmit={onMarkerSubmit}/>
+            <MarkerAddDialog isPopupVisible={isPopupVisible}
+                             onClose={() => setIsPopupVisible(false)}
+                             onSubmit={onMarkerSubmit}/>
             <div id="map" className="w-full h-full" />
         </div>
     )
 }
 
-function CustomPopup(
+function CustomMarkerPopup(
     props: {
         text: string | null,
         description: string | null

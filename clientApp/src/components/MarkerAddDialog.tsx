@@ -2,7 +2,7 @@ import {FormEvent, useState} from "react";
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "./ui/dialog.tsx";
 import {Button} from "./ui/button.tsx";
 
-export default function MarkerAddPopup(
+export default function MarkerAddDialog(
     props: {
         isPopupVisible: boolean,
         onClose: () => void,

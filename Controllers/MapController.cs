@@ -1,7 +1,9 @@
+using System.Net;
 using System.Security.Claims;
 using hajusrakendused.Models;
 using hajusrakendused.Models.http;
 using hajusrakendused.Models.Repository;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +17,9 @@ namespace hajusrakendused.controllers
         [HttpGet("get-markers")]
         public async Task<IActionResult> GetMarkers()
         {
+            var authResult = await HttpContext.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
+            var userId = authResult.Principal?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            
             var allMarkers = await markerRepository.GetAllMarkersAsync();
             var response = allMarkers.Select(marker => new MarkerResponse
             {
@@ -22,7 +27,7 @@ namespace hajusrakendused.controllers
                 Description = marker.Description,
                 Latitude = marker.Latitude,
                 Longitude = marker.Longitude,
-                CanEdit = false // todo: canEdit
+                IsOwn = userId != null && marker.UserId.Equals(Guid.Parse(userId))
             });
             
             return Ok(response);

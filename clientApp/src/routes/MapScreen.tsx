@@ -20,7 +20,7 @@ export default function MapScreen() {
     
     async function getAllMarkers() {
         // todo: update every 5 sec or websocket?
-        const markers = await MarkerRepository.getAllMarkers()
+        const markers = await MarkerRepository.getAllMarkers(appContext.token);
         setAllMarkers(markers)
     }
     
@@ -86,7 +86,7 @@ export default function MapScreen() {
             appContext.token!
         )
         
-        setAllMarkers(await MarkerRepository.getAllMarkers())
+        setAllMarkers(await MarkerRepository.getAllMarkers(appContext.token));
     }
     
     // todo: display desc for markers

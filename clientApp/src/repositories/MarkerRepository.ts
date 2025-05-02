@@ -9,8 +9,13 @@ export interface Marker {
 }
 
 export default class MarkerRepository {
-    static async getAllMarkers(): Promise<Marker[]> {
-        const response = await axios.get("/api/map/get-markers")
+    static async getAllMarkers(token: string | null): Promise<Marker[]> {
+        const response = await axios.get("/api/map/get-markers", {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        })
+        console.log(response.data)
         return response.data;
     }
     

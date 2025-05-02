@@ -24,7 +24,7 @@ export default function MarkerAddDialog(
     return (
         <Dialog open={props.isPopupVisible} onOpenChange={open => { if(!open) props.onClose() }}>
             <DialogContent>
-                <form className="p-6 flex flex-col gap-2" onSubmit={handleSubmit}>
+                <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>Add marker</DialogTitle>
                     </DialogHeader>

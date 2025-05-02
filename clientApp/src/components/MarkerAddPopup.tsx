@@ -1,9 +1,12 @@
 import {FormEvent, useState} from "react";
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "./ui/dialog.tsx";
+import {Button} from "./ui/button.tsx";
 
 export default function MarkerAddPopup(
     props: {
+        isPopupVisible: boolean,
         onClose: () => void,
-        onSubmit: (title: string, desc: string) => void,
+        onSubmit: (title: string, desc: string) => void
     }
 ) {
     const [title, setTitle] = useState("")
@@ -19,12 +22,19 @@ export default function MarkerAddPopup(
     // todo: field validation
     
     return (
-        <div className="absolute left-0 top-0 z-50 w-full h-screen bg-[#00000090] flex items-center justify-center">
-            <form className="bg-white p-6 flex flex-col gap-2" onSubmit={handleSubmit}>
-                <input className="border-2 border-solid border-black" type="text" onChange={(e) => setTitle(e.target.value)} value={title} />
-                <input className="border-2 border-solid border-black" type="text" onChange={(e) => setDescription(e.target.value)} value={description} />
-                <input type="submit" value="Submit" />
-            </form>
-        </div>
+        <Dialog open={props.isPopupVisible} onOpenChange={open => { if(!open) props.onClose() }}>
+            <DialogContent>
+                <form className="p-6 flex flex-col gap-2" onSubmit={handleSubmit}>
+                    <DialogHeader>
+                        <DialogTitle>Add marker</DialogTitle>
+                    </DialogHeader>
+                    <input className="border-2 border-solid border-black" type="text" onChange={(e) => setTitle(e.target.value)} value={title} />
+                    <input className="border-2 border-solid border-black" type="text" onChange={(e) => setDescription(e.target.value)} value={description} />
+                    <DialogFooter>
+                        <Button type="submit">Confirm</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     )
 }

@@ -93,10 +93,9 @@ export default function MapScreen() {
     
     return (
         <div className="w-full h-full">
-            {isPopupVisible && <MarkerAddPopup 
-                onClose={() => setIsPopupVisible(false)} 
-                onSubmit={onMarkerSubmit}
-            />}
+            <MarkerAddPopup isPopupVisible={isPopupVisible}
+                            onClose={() => setIsPopupVisible(false)}
+                            onSubmit={onMarkerSubmit}/>
             <div id="map" className="w-full h-full" />
         </div>
     )

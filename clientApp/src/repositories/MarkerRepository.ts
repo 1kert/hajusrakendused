@@ -9,6 +9,12 @@ export interface Marker {
     isOwn: boolean
 }
 
+export interface MarkerUpdateRequest {
+    id: number
+    title: string
+    description: string
+}
+
 export default class MarkerRepository {
     static async getAllMarkers(token: string | null): Promise<Marker[]> {
         const response = await axios.get("/api/map/get-markers", {
@@ -35,8 +41,27 @@ export default class MarkerRepository {
             }
         })
         
-        // todo: case when request fails
+        // todo: error handling
         
         return response.status === 200;
+    }
+    
+    static async updateMarker(
+        marker: MarkerUpdateRequest,
+        authToken: string
+    ): Promise<Marker> {
+        const response = await axios.put("/api/map/update-marker", {
+            id: marker.id,
+            title: marker.title,
+            description: marker.description,
+        }, {
+            headers: {
+                Authorization: "Bearer " + authToken
+            }
+        })
+        
+        // todo: error handling
+        
+        return response.data
     }
 }

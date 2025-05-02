@@ -22,27 +22,27 @@ interface MarkerDialogData {
 
 export default function MapScreen() {
     const appContext = useContext(AppContext)
-    if (appContext.token == null) return <LoginScreen />
-    
+    if (appContext.token == null) return <LoginScreen/>
+
     const [radarMap, setRadarMap] = useState<RadarMap | null>(null)
     const [allMarkers, setAllMarkers] = useState<Marker[]>([])
-    
+
     const [addDialogData, setAddDialogData] = useState<AddDialogData>()
     const [isAddDialogVisible, setIsAddDialogVisible] = useState<boolean>(false)
-    
+
     const [markerDialogData, setMarkerDialogData] = useState<MarkerDialogData | null>(null)
     const [isMarkerDialogVisible, setIsMarkerDialogVisible] = useState<boolean>(false)
-    
-    
+
+
     async function getAllMarkers() {
         // todo: update every 5 sec or websocket?
         const markers = await MarkerRepository.getAllMarkers(appContext.token);
         setAllMarkers(markers)
     }
-    
+
     useEffect(() => {
         if (radarMap == null) return;
-        
+
         allMarkers?.forEach((marker: Marker) => {
             if (marker.longitude == null || marker.latitude == null) return
             // todo: different marker colors for self and others
@@ -58,13 +58,13 @@ export default function MapScreen() {
                     setIsMarkerDialogVisible(true)
                 })
                 .addTo(radarMap)
-        }) 
-        
+        })
+
         return () => {
             radarMap.clearMarkers()
         }
     }, [allMarkers])
-    
+
     useEffect(() => {
         Radar.initialize("prj_live_pk_7a98b00dfd090c2938b71f3908bac856ec6393be");
         getAllMarkers().catch(console.error);
@@ -77,19 +77,19 @@ export default function MapScreen() {
 
         map.on("click", (e) => {
             setAddDialogData({
-                latitude: e.lngLat.lat, 
+                latitude: e.lngLat.lat,
                 longitude: e.lngLat.lng,
             })
             setIsAddDialogVisible(true)
         })
 
         setRadarMap(map)
-        
+
         return () => {
             map.remove()
         }
     }, [])
-    
+
     async function onMarkerSubmit(
         title: string,
         desc: string
@@ -97,7 +97,7 @@ export default function MapScreen() {
         const latitude = addDialogData?.latitude
         const longitude = addDialogData?.longitude
         if (latitude === undefined || longitude === undefined) throw new Error("submitted lngLat is required")
-        
+
         const marker: Marker = {
             title: title,
             description: desc,
@@ -106,25 +106,43 @@ export default function MapScreen() {
             id: 0,
             isOwn: false,
         }
-        
+
         await MarkerRepository.createMarker(
             marker,
             appContext.token!
         )
-        
+
         setAllMarkers(await MarkerRepository.getAllMarkers(appContext.token));
     }
-    
+
     async function onEditMarker(
         id: number,
         title: string,
         description: string
     ) {
-        
+        const responseMarker = await MarkerRepository.updateMarker({
+            description: description,
+            id: id,
+            title: title
+        }, appContext.token ?? "")
+
+        const updatedMarker = allMarkers.find(marker => marker.id === id)
+        if (!updatedMarker) return
+        updatedMarker.id = responseMarker.id
+        updatedMarker.title = responseMarker.title
+        updatedMarker.description = responseMarker.description
+        setAllMarkers(allMarkers)
+
+        setMarkerDialogData({
+            canEdit: responseMarker.isOwn,
+            description: description,
+            id: id,
+            title: title
+        })
     }
-    
+
     // todo: loading after adding marker
-    
+
     return (
         <div className="w-full h-full">
             <MarkerAddDialog isVisible={isAddDialogVisible}
@@ -138,7 +156,7 @@ export default function MapScreen() {
                           canEdit={markerDialogData?.canEdit ?? false}
                           onClose={() => setIsMarkerDialogVisible(false)}
                           onEdit={(title, description) => onEditMarker(markerDialogData?.id ?? 0, title, description)}/>
-            <div id="map" className="w-full h-full" />
+            <div id="map" className="w-full h-full"/>
         </div>
     )
 }

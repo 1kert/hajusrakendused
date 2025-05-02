@@ -19,8 +19,8 @@ namespace hajusrakendused.controllers
         {
             var authResult = await HttpContext.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
             var userId = authResult.Principal?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-            
-            var allMarkers = await markerRepository.GetAllMarkersAsync();
+
+            var allMarkers = await markerRepository.GetAllAsync();
             var response = allMarkers.Select(marker => new MarkerResponse
             {
                 Id = marker.Id,
@@ -30,7 +30,7 @@ namespace hajusrakendused.controllers
                 Longitude = marker.Longitude,
                 IsOwn = userId != null && marker.UserId.Equals(Guid.Parse(userId))
             });
-            
+
             return Ok(response);
         }
 
@@ -40,13 +40,13 @@ namespace hajusrakendused.controllers
         {
             var userId = User.Claims.FirstOrDefault(x => x.Type.Equals(ClaimTypes.NameIdentifier));
             if (userId == null) return StatusCode(StatusCodes.Status500InternalServerError);
-            
+
             string title = marker.Title?.Trim() ?? ""; // todo: max size
             string description = marker.Description?.Trim() ?? "";
             if (title.Length == 0 || description.Length == 0) return BadRequest();
             if (marker.Longitude == null || marker.Latitude == null) return BadRequest();
 
-            await markerRepository.CreateMarkerAsync(new MarkerEntity
+            await markerRepository.CreateAsync(new MarkerEntity
             {
                 Title = title,
                 Description = description,
@@ -56,8 +56,38 @@ namespace hajusrakendused.controllers
                 UpdatedAt = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow
             });
-            
+
             return Ok();
+        }
+
+        [HttpPut("update-marker")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> UpdateMarker([FromBody] MarkerUpdateRequest marker)
+        {
+            bool hasUserId = Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type.Equals(ClaimTypes.NameIdentifier))?.Value, out Guid userId);
+            if (!hasUserId) return Unauthorized();
+            if (marker.Id == null) return BadRequest();
+
+            int markerId = marker.Id.Value;
+            string title = marker.Title?.Trim() ?? ""; // todo: min and max size
+            string description = marker.Description?.Trim() ?? "";
+            if (title.Length == 0 || description.Length == 0) return BadRequest();
+
+            var markerEntity = await markerRepository.GetByIdAsync(markerId);
+            if (markerEntity == null) return NotFound();
+            if (!markerEntity.UserId.Equals(userId)) return Unauthorized();
+
+            var result = await markerRepository.UpdateTitleAndDescription(markerId, title, description);
+            if (result == null) return NotFound();
+            return Ok(new MarkerResponse
+            {
+                Id = result.Id,
+                Title = result.Title,
+                Description = result.Description,
+                Latitude = result.Latitude,
+                Longitude = result.Longitude,
+                IsOwn = result.UserId.Equals(userId)
+            });
         }
     }
 }

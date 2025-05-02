@@ -1,9 +1,9 @@
 using System.Text;
 using hajusrakendused.Models;
+using hajusrakendused.Models.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -49,6 +49,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddScoped<MarkerRepository>();
 builder.Services.AddDbContext<DatabaseContext>(options => options
     .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 

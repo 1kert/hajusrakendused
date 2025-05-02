@@ -20,7 +20,7 @@ export const AppContext = createContext<appContext>(initialContext)
 function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem("token"))
   
-  return (
+  return ( // todo: when 401 unauthorized, re prompt login
     <AppContext.Provider value={{token, setToken}}>
       <ErrorBoundary fallback={<p>error</p>} onError={(e) => console.error(e)} >
         <BrowserRouter>

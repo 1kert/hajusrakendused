@@ -20,9 +20,9 @@ export default function MarkerDialog(
     const [title, setTitle] = useState("")
     const [description, setDescription] = useState("")
     
-    useEffect(() => { // todo: remove when finished
-        handleOnEditClick()
-    }, [])
+    useEffect(() => {
+        if (props.isVisible) setIsEditing(false)
+    }, [props.isVisible])
     
     function handleOnEditClick() {
         setTitle(props.title)
@@ -41,14 +41,15 @@ export default function MarkerDialog(
             <DialogContent>
                 <DialogHeader>
                     <div className="flex gap-2 pr-4">
-                        {/*<h1 className="text-xl">{props.title}</h1>*/}
-                        <Input type="text" onChange={e => setTitle(e.target.value)} value={title}/>
-                        { props.canEdit && <img src={ic_edit} alt="edit" onClick={handleOnEditClick} className="size-6 relative top-0.5 hover:cursor-pointer" /> }
+                        { !isEditing && <h1 className="text-xl">{props.title}</h1> }
+                        { isEditing && <Input type="text" className="md:text-xl mr-24" onChange={e => setTitle(e.target.value)} value={title}/> }
+                        { (props.canEdit && !isEditing) && <img src={ic_edit} alt="edit" onClick={handleOnEditClick} className="size-6 relative top-0.5 hover:cursor-pointer" /> }
                     </div>
                     <p className="text-xs text-gray-700">Created by {props.author}</p>
                     <p className="text-xs text-gray-500">{props.updateDate}</p>
                 </DialogHeader>
-                <p>{props.description}</p>
+                { !isEditing && <p>{props.description}</p> }
+                { isEditing &&<textarea onChange={e => setDescription(e.target.value)} value={description} spellCheck="false" rows={3} className="resize-none w-full rounded-md border border-input px-3 py-2 shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:text-md"/> }
                 { isEditing && (
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>

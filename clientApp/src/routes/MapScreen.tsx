@@ -115,7 +115,14 @@ export default function MapScreen() {
         setAllMarkers(await MarkerRepository.getAllMarkers(appContext.token));
     }
     
-    // todo: display desc for markers
+    async function onEditMarker(
+        id: number,
+        title: string,
+        description: string
+    ) {
+        
+    }
+    
     // todo: loading after adding marker
     
     return (
@@ -129,7 +136,8 @@ export default function MapScreen() {
                           author={"some guy"} // todo: show author
                           updateDate={"10 years ago"} // todo: show update date
                           canEdit={markerDialogData?.canEdit ?? false}
-                          onClose={() => setIsMarkerDialogVisible(false)}/>
+                          onClose={() => setIsMarkerDialogVisible(false)}
+                          onEdit={(title, description) => onEditMarker(markerDialogData?.id ?? 0, title, description)}/>
             <div id="map" className="w-full h-full" />
         </div>
     )

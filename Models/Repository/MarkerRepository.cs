@@ -25,4 +25,13 @@ public class MarkerRepository(DatabaseContext dbContext)
         await dbContext.SaveChangesAsync();
         return marker;
     }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var marker = await dbContext.Markers.FindAsync(id);
+        if (marker == null) return false;
+        dbContext.Markers.Remove(marker);
+        await dbContext.SaveChangesAsync();
+        return true;
+    }
 }

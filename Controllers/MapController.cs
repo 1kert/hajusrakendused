@@ -89,5 +89,15 @@ namespace hajusrakendused.controllers
                 IsOwn = result.UserId.Equals(userId)
             });
         }
+
+        [HttpDelete("delete-marker/{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> DeleteMarker(string id)
+        {
+            bool isIdValid = int.TryParse(id, out int markerId);
+            if (!isIdValid) return BadRequest();
+            if (!await markerRepository.DeleteAsync(markerId)) return NotFound();
+            return Ok();
+        }
     }
 }

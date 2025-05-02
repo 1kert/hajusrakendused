@@ -140,8 +140,17 @@ export default function MapScreen() {
             title: title
         })
     }
+    
+    async function onDeleteMarker(id: number) {
+        const response = await MarkerRepository.deleteMarker(id, appContext.token ?? "")
+        if (!response) return
+        const updatedAllMarkers = allMarkers.filter(marker => marker.id !== id)
+        console.log(updatedAllMarkers)
+        setAllMarkers(updatedAllMarkers)
+    }
 
     // todo: loading after adding marker
+    // todo: confirmation for delete?
 
     return (
         <div className="w-full h-full">
@@ -154,6 +163,7 @@ export default function MapScreen() {
                           author={"some guy"} // todo: show author
                           updateDate={"10 years ago"} // todo: show update date
                           canEdit={markerDialogData?.canEdit ?? false}
+                          onRemove={() => onDeleteMarker(markerDialogData?.id ?? 0)}
                           onClose={() => setIsMarkerDialogVisible(false)}
                           onEdit={(title, description) => onEditMarker(markerDialogData?.id ?? 0, title, description)}/>
             <div id="map" className="w-full h-full"/>

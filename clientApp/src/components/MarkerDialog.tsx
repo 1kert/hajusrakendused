@@ -13,6 +13,7 @@ export default function MarkerDialog(
         updateDate: string
         canEdit: boolean
         onEdit: (title: string, description: string) => void
+        onRemove: () => void
         onClose: () => void
     }
 ) {
@@ -36,6 +37,11 @@ export default function MarkerDialog(
         // todo: handle loading
     }
     
+    function handleOnRemoveClick() {
+        props.onClose()
+        props.onRemove()
+    }
+    
     return (
         <Dialog open={props.isVisible} onOpenChange={open => { if(!open) props.onClose() }}>
             <DialogContent>
@@ -52,6 +58,7 @@ export default function MarkerDialog(
                 { isEditing &&<textarea onChange={e => setDescription(e.target.value)} value={description} spellCheck="false" rows={3} className="resize-none w-full rounded-md border border-input px-3 py-2 shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:text-md"/> }
                 { isEditing && (
                     <DialogFooter>
+                        <Button variant="link" onClick={handleOnRemoveClick} className="mr-auto text-red-600">Remove</Button>
                         <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
                         <Button onClick={handleOnConfirmClick}>Confirm</Button>
                     </DialogFooter>

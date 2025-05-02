@@ -64,4 +64,14 @@ export default class MarkerRepository {
         
         return response.data
     }
+    
+    static async deleteMarker(id: number, authToken: string): Promise<boolean> {
+        const response = await axios.delete(`/api/map/delete-marker/${id}`, {
+            headers: {
+                Authorization: "Bearer " + authToken
+            }
+        })
+        
+        return response.status === 200;
+    }
 }

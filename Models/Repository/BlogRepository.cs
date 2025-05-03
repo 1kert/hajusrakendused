@@ -1,27 +1,34 @@
 using hajusrakendused.Models.http;
+using Microsoft.EntityFrameworkCore;
 
 namespace hajusrakendused.Models.Repository;
 
-public class BlogRepository
+public class BlogRepository(DatabaseContext dbContext)
 {
-    private static List<BlogEntity> blogs = []; // todo: use db
-
     public async Task<bool> AddBlogAsync(BlogEntity blog)
     {
-        await Task.Delay(500);
-        blogs.Add(blog);
+        dbContext.Blogs.Add(blog);
+        await dbContext.SaveChangesAsync();
         return true;
     }
 
     public async Task<BlogResponse[]> GetAllBlogsResponsesAsync()
     {
-        await Task.Delay(500);
+        var blogs = await dbContext.Blogs
+            .Include(x => x.CreatedByUser)
+            .ToArrayAsync();
+        
         return blogs.Select(x => new BlogResponse
         {
             Title = x.Title,
             Content = x.Content,
-            Author = "who knows",
+            Author = x.CreatedByUser.UserName ?? "no name",
             UpdatedAt = x.UpdatedAt
         }).ToArray();
     }
+    //
+    // public async Task<BlogResponse?> GetBlogResponseAsync(long id)
+    // {
+    //     
+    // }
 }

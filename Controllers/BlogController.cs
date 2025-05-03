@@ -4,6 +4,7 @@ using hajusrakendused.Models.http;
 using hajusrakendused.Models.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace hajusrakendused.Controllers;
@@ -17,6 +18,13 @@ public class BlogController(BlogRepository blogRepository): ControllerBase
     {
         return Ok(await blogRepository.GetAllBlogsResponsesAsync());
     }
+    
+    [HttpGet("/{id:long}")]
+    public async Task<IActionResult> GetBlog(long id)
+    {
+        Console.WriteLine(id); // todo
+        return Ok();
+    }
 
     [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -28,12 +36,11 @@ public class BlogController(BlogRepository blogRepository): ControllerBase
 
         var result = await blogRepository.AddBlogAsync(new BlogEntity
         {
-            Id = 0,
             Title = request.Title,
             Content = request.Content,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            CreatedBy = Guid.Parse(userId)
+            CreatedBy = userId
         });
         
         return !result ? StatusCode(StatusCodes.Status500InternalServerError) : Ok();

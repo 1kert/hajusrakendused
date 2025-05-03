@@ -20,7 +20,7 @@ public class WeatherRepository(IConfiguration configuration)
         var result = await client.GetAsync(_url);
         if (!result.IsSuccessStatusCode) return null;
         var jsonString = await result.Content.ReadAsStringAsync();
-        WeatherCache.ExpiresAt = DateTime.UtcNow.AddHours(1);
+        WeatherCache.ExpiresAt = DateTime.UtcNow.AddMinutes(30);
         WeatherCache.DataJson = jsonString;
 
         return WeatherCache;

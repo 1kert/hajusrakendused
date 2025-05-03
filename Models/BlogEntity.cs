@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Identity;
+
 namespace hajusrakendused.Models;
 
 public class BlogEntity
@@ -7,5 +9,6 @@ public class BlogEntity
     public required string Content { get; set; }
     public required DateTime CreatedAt { get; set; }
     public required DateTime UpdatedAt { get; set; }
-    public required Guid CreatedBy { get; set; }
+    public required string CreatedBy { get; set; }
+    public IdentityUser CreatedByUser { get; set; } = null!;
 }

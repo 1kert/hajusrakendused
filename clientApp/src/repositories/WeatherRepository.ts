@@ -5,10 +5,8 @@ export interface WeatherData {
         main: string
         description: string
         icon: string
-    }[]
-    main: {
-        temp: string
     }
+    temperature: string
     name: string
 }
 
@@ -17,15 +15,13 @@ export default class WeatherRepository {
         const response = (await axios.get("/api/weather")).data
         // todo: error handling
         return {
-            main: {
-                temp: response.main.temp
-            },
+            temperature: response.main.temp,
             name: response.name,
-            weather: response.weather.map((w: any) => ({
-                main: w.main,
-                description: w.description,
-                icon: w.icon
-            }))
+            weather: {
+                main: response.weather[0].main,
+                description: response.weather[0].description,
+                icon: response.weather[0].icon,
+            }
         };
     }
 }

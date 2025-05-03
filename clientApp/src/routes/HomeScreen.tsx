@@ -1,13 +1,15 @@
 import rat from "../assets/rat.gif"
-import {useEffect} from "react";
-import WeatherRepository from "../repositories/WeatherRepository.ts";
+import {useEffect, useState} from "react";
+import WeatherRepository, { WeatherData } from "../repositories/WeatherRepository.ts";
 
 export default function HomeScreen() {
     // todo: rat
+    const [weatherData, setWeatherData] = useState<WeatherData | null>(null)
+    
     useEffect(() => {
         (async () => {
             const weatherData = await WeatherRepository.getWeatherData()
-            console.log(weatherData)
+            setWeatherData(weatherData)
         })()
     }, [])
     
@@ -30,8 +32,15 @@ export default function HomeScreen() {
                                     onClick={() => {}}/>
                 </div>
             </div>
+            {/*todo: loading*/}
             <div className="flex justify-end w-full">
-                
+                {weatherData && (
+                    <WeatherInfoCard weatherTitle={weatherData.weather.main}
+                                     weatherDescription={weatherData.weather.description}
+                                     weatherIcon={weatherData.weather.icon}
+                                     cityName={weatherData.name}
+                                     temperature={weatherData.temperature}/>
+                )}
             </div>
         </div>
     )
@@ -48,6 +57,30 @@ function NavigationCard(
         <div className="bg-gray-300 w-[300px] p-4 rounded-md shadow-md hover:cursor-pointer hover:bg-gray-400">
             <p className="text-3xl mb-2 font-medium">{props.title}</p>
             <p className="text-lg">{props.description}</p>
+        </div>
+    )
+}
+
+function WeatherInfoCard(
+    props: {
+        weatherTitle: string
+        weatherDescription: string
+        weatherIcon: string
+        cityName: string
+        temperature: string
+    }
+) {
+    return (
+        <div className="flex w-[400px] bg-gray-300 h-max px-4 py-2 justify-between items-end rounded-md shadow-md">
+            <div className="flex flex-col gap-2">
+                <div className="flex w-full justify-between items-center gap-2">
+                    <img className="size-12" src={`https://openweathermap.org/img/wn/${props.weatherIcon}.png`} alt=""/>
+                    <p className="text-sm text-gray-600">{props.cityName}</p>
+                </div>
+                <p className="text-lg">{props.weatherTitle}</p>
+                <p className="-mt-2 text-md">{props.weatherDescription}</p>
+            </div>
+            <p className="text-2xl font-bold">{props.temperature}&#176;C</p>
         </div>
     )
 }

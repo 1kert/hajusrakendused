@@ -4,6 +4,8 @@ import HomeScreen from "./routes/HomeScreen.tsx"
 import MainLayout from "./routes/MainLayout"
 import {createContext, useState} from "react"
 import {ErrorBoundary} from "react-error-boundary";
+import BlogScreen from "./routes/BlogScreen.tsx";
+import BlogCreateScreen from "./routes/BlogCreateScreen.tsx";
 
 export interface appContext {
   token: string | null,
@@ -28,6 +30,8 @@ function App() {
             <Route path="/" Component={MainLayout}>
               <Route index Component={HomeScreen} />
               <Route path="/map" Component={MapScreen} />
+              <Route path="/blogs" Component={BlogScreen} />
+              <Route path="/blogs/create" Component={BlogCreateScreen} />
             </Route>
           </Routes>
         </BrowserRouter>

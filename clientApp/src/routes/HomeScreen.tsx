@@ -1,7 +1,15 @@
 import rat from "../assets/rat.gif"
+import {useEffect} from "react";
+import WeatherRepository from "../repositories/WeatherRepository.ts";
 
 export default function HomeScreen() {
     // todo: rat
+    useEffect(() => {
+        (async () => {
+            const weatherData = await WeatherRepository.getWeatherData()
+            console.log(weatherData)
+        })()
+    }, [])
     
     return (
         <div className="h-full w-full p-8 flex">

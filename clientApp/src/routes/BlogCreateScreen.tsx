@@ -1,16 +1,26 @@
 import {Input} from "../components/ui/input.tsx";
-import {useState} from "react";
+import {useContext, useState} from "react";
 import {Button} from "../components/ui/button.tsx";
+import BlogRepository from "../repositories/BlogRepository.tsx";
+import {AppContext} from "../App.tsx";
+import {useNavigate} from "react-router-dom";
 
 export default function BlogCreateScreen() {
+    const appContext = useContext(AppContext);
+    const navigate = useNavigate()
     const [title, setTitle] = useState("")
     const [content, setContent] = useState("")
     
     // todo: title and description validation
     // todo: user styling for content?
     
-    function onCreateClick() {
-        
+    async function onCreateClick() {
+        await BlogRepository.create({
+            content: content,
+            title: title
+        }, appContext.token ?? "")
+        console.log("done")
+        navigate("/blogs")
     }
     
     return (

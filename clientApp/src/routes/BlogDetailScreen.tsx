@@ -8,11 +8,14 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "../components/ui/dropdown-menu.tsx";
+import {Textarea} from "../components/ui/textarea.tsx";
+import {Button} from "../components/ui/button.tsx";
 
 export default function BlogDetailScreen() {
     const params = useParams()
     const navigate = useNavigate()
     const [blog, setBlog] = useState<Blog | null>(null)
+    const [commentAreaText, setCommentAreaText] = useState("")
     
     useEffect(() => {
         (async () => {
@@ -37,6 +40,11 @@ export default function BlogDetailScreen() {
         await getBlog()
     }
     
+    async function onCommentCreate() {
+        await BlogRepository.createComment(commentAreaText)
+        await getBlog()
+    }
+    
     // todo: loading
     // todo: error
     
@@ -48,6 +56,8 @@ export default function BlogDetailScreen() {
                     <p>Created by <span className="font-bold">{blog.author}</span>, last updated {blog.updatedAt}</p>
                     <p className="mt-4">{blog.content}</p>
                     <p className="text-xl mt-10">Comments</p>
+                    <Textarea rows={4} spellCheck={false} className="resize-none border-gray-600 text-lg" value={commentAreaText} onChange={e => setCommentAreaText(e.target.value)} />
+                    <Button onClick={onCommentCreate} className="w-max ml-auto">Comment</Button>
                     <div className="mt-5 gap flex flex-col gap-4">
                         {blog.comments?.map(comment => 
                             <CommentCard

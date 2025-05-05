@@ -43,6 +43,7 @@ export default function BlogDetailScreen() {
     async function onCommentCreate() {
         await BlogRepository.createComment(commentAreaText)
         await getBlog()
+        setCommentAreaText("")
     }
     
     // todo: loading
@@ -56,7 +57,7 @@ export default function BlogDetailScreen() {
                     <p>Created by <span className="font-bold">{blog.author}</span>, last updated {blog.updatedAt}</p>
                     <p className="mt-4">{blog.content}</p>
                     <p className="text-xl mt-10">Comments</p>
-                    <Textarea rows={4} spellCheck={false} className="resize-none border-gray-600 text-lg" value={commentAreaText} onChange={e => setCommentAreaText(e.target.value)} />
+                    <Textarea rows={4} spellCheck={false} className="resize-none border-gray-600 text-lg md:text-md" value={commentAreaText} onChange={e => setCommentAreaText(e.target.value)} />
                     <Button onClick={onCommentCreate} className="w-max ml-auto">Comment</Button>
                     <div className="mt-5 gap flex flex-col gap-4">
                         {blog.comments?.map(comment => 
@@ -85,8 +86,18 @@ function CommentCard(
         onDelete?: () => void
     }
 ) {
+    const [isEditing, setIsEditing] = useState(false)
+    const [text, setText] = useState("")
+    
     function onEditClick() {
-        
+        setText(props.content)
+        setIsEditing(true)
+    }
+    
+    function onConfirmClick() {
+        if (!props.onEdit) throw Error("Can't edit comment")
+        props.onEdit(text)
+        setIsEditing(false)
     }
     
     return (
@@ -96,7 +107,7 @@ function CommentCard(
                     <p className="font-bold">{props.author}</p>
                     <p className="text-sm text-gray-600">{props.updatedAt}</p>
                 </div>
-                {(props.onEdit || props.onDelete) &&
+                {(props.onEdit || props.onDelete) && !isEditing &&
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <img className="size-7 mt-1 hover:cursor-pointer" src={vertical_menu} alt="more"/>
@@ -108,7 +119,16 @@ function CommentCard(
                     </DropdownMenu>
                 }
             </div>
-            <p className="mt-2">{props.content}</p>
+            {!isEditing && <p className="mt-2">{props.content}</p>}
+            {isEditing && (
+                <div className="flex flex-col">
+                    <Textarea rows={4} spellCheck={false} className="resize-none border-gray-600 md:text-md mt-2" value={text} onChange={e => setText(e.target.value)} />
+                    <div className="flex gap-2 mt-2 ml-auto">
+                        <Button onClick={() => setIsEditing(false)} variant="outline">Cancel</Button>
+                        <Button onClick={onConfirmClick}>Confirm</Button>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

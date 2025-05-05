@@ -20,6 +20,7 @@ public class BlogRepository(DatabaseContext dbContext)
         
         return blogs.Select(x => new BlogResponse
         {
+            Id = x.Id,
             Title = x.Title,
             Content = x.Content,
             Author = x.CreatedByUser.UserName ?? "no name",

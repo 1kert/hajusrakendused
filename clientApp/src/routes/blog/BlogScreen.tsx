@@ -1,7 +1,7 @@
-import {Button} from "../components/ui/button.tsx";
+import {Button} from "../../components/ui/button.tsx";
 import {Link, useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
-import BlogRepository, {Blog} from "../repositories/BlogRepository.tsx";
+import BlogRepository, {Blog} from "../../repositories/BlogRepository.tsx";
 
 export default function BlogScreen() {
     const [blogs, setBlogs] = useState<Blog[]>([])

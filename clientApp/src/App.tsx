@@ -7,6 +7,7 @@ import {ErrorBoundary} from "react-error-boundary";
 import BlogScreen from "./routes/blog/BlogScreen.tsx"
 import BlogCreateScreen from "./routes/blog/BlogCreateScreen.tsx";
 import BlogDetailScreen from "./routes/blog/BlogDetailScreen.tsx";
+import StoreScreen from "./routes/store/StoreScreen.tsx"
 
 export interface appContext {
   token: string,
@@ -34,6 +35,7 @@ function App() {
               <Route path="/blogs" Component={BlogScreen} />
               <Route path="/blog/create" Component={BlogCreateScreen} />
               <Route path="/blog/:id" Component={BlogDetailScreen} />
+              <Route path="/store" Component={StoreScreen} />
             </Route>
           </Routes>
         </BrowserRouter>

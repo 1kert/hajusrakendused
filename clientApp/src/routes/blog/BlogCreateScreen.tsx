@@ -1,8 +1,8 @@
-import {Input} from "../components/ui/input.tsx";
+import {Input} from "../../components/ui/input.tsx";
 import {useContext, useState} from "react";
-import {Button} from "../components/ui/button.tsx";
-import BlogRepository from "../repositories/BlogRepository.tsx";
-import {AppContext} from "../App.tsx";
+import {Button} from "../../components/ui/button.tsx";
+import BlogRepository from "../../repositories/BlogRepository.tsx";
+import {AppContext} from "../../App.tsx";
 import {useNavigate} from "react-router-dom";
 
 export default function BlogCreateScreen() {

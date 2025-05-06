@@ -1,10 +1,11 @@
 import rat from "../assets/rat.gif"
 import {useEffect, useState} from "react";
 import WeatherRepository, { WeatherData } from "../repositories/WeatherRepository.ts";
+import {useNavigate} from "react-router-dom";
 
 export default function HomeScreen() {
-    // todo: rat
     const [weatherData, setWeatherData] = useState<WeatherData | null>(null)
+    const navigate = useNavigate()
     
     useEffect(() => {
         (async () => {
@@ -23,13 +24,13 @@ export default function HomeScreen() {
                 <div className="flex gap-8">
                     <NavigationCard title="Map"
                                     description="Adding markers on a map n' such. For when you want to feel like you're doing something productive."
-                                    onClick={() => {}}/>
+                                    onClick={() => navigate("/map")}/>
                     <NavigationCard title="Blogs"
                                     description="Long-form opinions disguised as insight. Perfect for pretending you're learning something."
-                                    onClick={() => {}}/>
+                                    onClick={() => navigate("/blogs")}/>
                     <NavigationCard title="Store"
                                     description="Give us your money in exchange for things you probably don’t need. Minimal guilt, maximum cart size."
-                                    onClick={() => {}}/>
+                                    onClick={() => navigate("/store")}/>
                 </div>
             </div>
             {/*todo: loading*/}
@@ -54,7 +55,7 @@ function NavigationCard(
     }
 ) {
     return (
-        <div className="bg-gray-300 w-[300px] p-4 rounded-md shadow-md hover:cursor-pointer hover:bg-gray-400">
+        <div onClick={props.onClick} className="bg-gray-300 w-[300px] p-4 rounded-md shadow-md hover:cursor-pointer hover:bg-gray-400">
             <p className="text-3xl mb-2 font-medium">{props.title}</p>
             <p className="text-lg">{props.description}</p>
         </div>

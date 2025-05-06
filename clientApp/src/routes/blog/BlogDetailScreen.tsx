@@ -1,17 +1,17 @@
 import {useNavigate, useParams} from "react-router-dom";
 import {useContext, useEffect, useState} from "react";
-import BlogRepository, {Blog} from "../repositories/BlogRepository.tsx";
-import vertical_menu from "../assets/ic_vertical_menu.svg"
+import BlogRepository, {Blog} from "../../repositories/BlogRepository.tsx";
+import vertical_menu from "../../assets/ic_vertical_menu.svg"
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger
-} from "../components/ui/dropdown-menu.tsx";
-import {Textarea} from "../components/ui/textarea.tsx";
-import {Button} from "../components/ui/button.tsx";
-import {AppContext, appContext} from "../App.tsx";
-import {Input} from "../components/ui/input.tsx";
+} from "../../components/ui/dropdown-menu.tsx";
+import {Textarea} from "../../components/ui/textarea.tsx";
+import {Button} from "../../components/ui/button.tsx";
+import {AppContext, appContext} from "../../App.tsx";
+import {Input} from "../../components/ui/input.tsx";
 
 export default function BlogDetailScreen() {
     const context = useContext<appContext>(AppContext);

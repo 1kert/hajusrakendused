@@ -5,14 +5,14 @@ namespace hajusrakendused.Models.Repository;
 
 public class BlogRepository(DatabaseContext dbContext)
 {
-    private static bool CanEditComment(BlogCommentEntity comment, string userId) => comment.CreatedBy.Id.Equals(userId);
+    private static bool CanEditComment(BlogCommentEntity comment, string userId) => comment.CreatedById.Equals(userId);
 
     private static bool CanDeleteComment(
         BlogEntity blog, 
         BlogCommentEntity comment, 
         string userId,
         ICollection<UserRole> roles
-    ) => userId == blog.CreatedBy || roles.Contains(UserRole.Admin) || userId == comment.CreatedBy.UserName;
+    ) => userId.Equals(blog.CreatedBy) || roles.Contains(UserRole.Admin) || userId.Equals(comment.CreatedBy.Id);
     
     public async Task<bool> AddBlogAsync(BlogEntity blog)
     {

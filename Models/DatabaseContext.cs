@@ -25,7 +25,7 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : Identi
             entity
                 .HasMany(x => x.Comments)
                 .WithOne(x => x.Blog)
-                .HasForeignKey("BlogId")
+                .HasForeignKey(x => x.BlogId)
                 .IsRequired();
         });
 
@@ -34,7 +34,7 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : Identi
             entity
                 .HasOne(x => x.CreatedBy)
                 .WithMany()
-                .HasForeignKey("UserId")
+                .HasForeignKey(x => x.CreatedById)
                 .IsRequired();
         });
     }

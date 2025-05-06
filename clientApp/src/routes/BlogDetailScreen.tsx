@@ -1,5 +1,5 @@
 import {useNavigate, useParams} from "react-router-dom";
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import BlogRepository, {Blog} from "../repositories/BlogRepository.tsx";
 import vertical_menu from "../assets/ic_vertical_menu.svg"
 import {
@@ -10,8 +10,10 @@ import {
 } from "../components/ui/dropdown-menu.tsx";
 import {Textarea} from "../components/ui/textarea.tsx";
 import {Button} from "../components/ui/button.tsx";
+import {AppContext, appContext} from "../App.tsx";
 
 export default function BlogDetailScreen() {
+    const context = useContext<appContext>(AppContext);
     const params = useParams()
     const navigate = useNavigate()
     const [blog, setBlog] = useState<Blog | null>(null)
@@ -27,21 +29,27 @@ export default function BlogDetailScreen() {
     
     async function getBlog(id: number | undefined = blog?.id) {
         if (!id) throw Error("Blog not found")
-        setBlog(await BlogRepository.get(id))
+        setBlog(await BlogRepository.get(id, context.token ?? ""))
     }
     
     async function onCommentEdit(id: number, content: string) {
-        await BlogRepository.editComment(id, content)
+        await BlogRepository.editComment(id, content, context.token ?? "")
         await getBlog()
     }
     
     async function onCommentDelete(id: number) {
-        await BlogRepository.deleteComment(id)
+        await BlogRepository.deleteComment(id, context.token ?? "")
         await getBlog()
     }
     
     async function onCommentCreate() {
-        await BlogRepository.createComment(commentAreaText)
+        if (!blog) throw Error("Blog not found")
+        
+        await BlogRepository.createComment(
+            blog.id,
+            commentAreaText,
+            context.token ?? ""
+        )
         await getBlog()
         setCommentAreaText("")
     }

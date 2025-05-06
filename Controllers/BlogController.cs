@@ -67,7 +67,7 @@ public class BlogController(BlogRepository blogRepository): ControllerBase
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> EditComment([FromBody] BlogCommentUpdateRequest request)
     {
-        if (request.Content == null || request.Id == null || request.BlogId == null) return BadRequest();
+        if (request.Content == null || request.Id == null) return BadRequest();
         
         var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
         if (userId == null) return StatusCode(StatusCodes.Status500InternalServerError);

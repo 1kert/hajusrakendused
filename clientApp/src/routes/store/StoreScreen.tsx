@@ -1,6 +1,8 @@
-import {useEffect, useState} from "react";
-import StoreRepository, {StoreItem} from "../../repositories/StoreRepository.ts";
-import {useNavigate} from "react-router-dom";
+import {useEffect, useState} from "react"
+import StoreRepository, {StoreItem} from "../../repositories/StoreRepository.ts"
+import {useNavigate} from "react-router-dom"
+import {Button} from "../../components/ui/button.tsx"
+import ic_cart from "../../assets/ic_shopping_cart.svg"
 
 export default function StoreScreen() {
     const navigate  = useNavigate();
@@ -18,8 +20,11 @@ export default function StoreScreen() {
     }
     
     return (
-        <div className="flex flex-col w-full p-8">
-            <div className="grid grid-cols-4 gap-3 w-max mx-auto">
+        <div className="flex flex-col w-[1300px] p-8 mx-auto">
+            <Button onClick={() => navigate("/store/cart")} className="w-max ml-auto">
+                <img src={ic_cart} alt="cart"/>
+            </Button>
+            <div className="flex flex-wrap gap-3 w-full mx-auto mt-4">
                 {storeItems.map(item => (
                     <StoreItemCard 
                         name={item.name}

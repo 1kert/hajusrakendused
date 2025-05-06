@@ -52,8 +52,8 @@ export default function StoreItemDetailScreen() {
                         <p className="text-lg mt-5">{storeItem.description}</p>
                         <div className="flex gap-2 mt-4">
                             <Input className="w-16 text-center" value={quantity} onChange={e => setQuantity(e.target.value)}/>
-                            <Button>
-                                <img onClick={onAddToCartClick} className="size-full" src={ic_cart} alt="cart"/>
+                            <Button onClick={onAddToCartClick}>
+                                <img className="size-full" src={ic_cart} alt="cart"/>
                             </Button>
                         </div>
                     </div>

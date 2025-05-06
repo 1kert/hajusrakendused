@@ -9,6 +9,7 @@ import BlogCreateScreen from "./routes/blog/BlogCreateScreen.tsx";
 import BlogDetailScreen from "./routes/blog/BlogDetailScreen.tsx";
 import StoreScreen from "./routes/store/StoreScreen.tsx"
 import StoreItemDetailScreen from "./routes/store/StoreItemDetailScreen.tsx";
+import StoreCartScreen from "./routes/store/StoreCartScreen.tsx";
 
 export interface appContext {
   token: string,
@@ -38,6 +39,7 @@ function App() {
               <Route path="/blog/:id" Component={BlogDetailScreen} />
               <Route path="/store" Component={StoreScreen} />
               <Route path="/store/:id" Component={StoreItemDetailScreen} />
+              <Route path="/store/cart" Component={StoreCartScreen} />
             </Route>
           </Routes>
         </BrowserRouter>

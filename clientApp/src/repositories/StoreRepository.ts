@@ -6,7 +6,11 @@ export interface StoreItem {
     price: number
 }
 
-export interface CartItem extends StoreItem {
+export interface CartItem {
+    id: number
+    image: string
+    name: string
+    price: number
     quantity: number
 }
 
@@ -102,7 +106,7 @@ export default class StoreRepository {
     // ----------------------------------
 
     static async getCart(): Promise<CartItem[]> {
-        return this.cartItems
+        return [...this.cartItems]
     }
     
     static async addToCart(
@@ -110,12 +114,19 @@ export default class StoreRepository {
         quantity: number,
         token: string
     ): Promise<boolean> {
+        const index = this.cartItems.findIndex(x => x.id === item.id)
+        if (index >= 0) {
+            const current = this.cartItems[index]
+            current.quantity += quantity
+            
+            return true
+        }
+        
         this.cartItems.push({
             quantity: quantity,
             id: item.id,
             image: item.image,
             name: item.name,
-            description: item.description,
             price: item.price
         })
         
@@ -127,7 +138,7 @@ export default class StoreRepository {
         token: string
     ): Promise<boolean> {
         const index = this.cartItems.findIndex(item => itemId === item.id)
-        if (index > -1) return false
+        if (index == -1) return false
         
         this.cartItems.splice(index, 1)
         return true

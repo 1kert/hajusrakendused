@@ -25,7 +25,6 @@ export default function BlogCreateScreen() {
     
     return (
         <div className="h-full w-full p-8 flex flex-col">
-            <h1 className="text-5xl">Blog create screen</h1>
             <div className="w-[600px] mx-auto mt-8 flex flex-col">
                 <div className="flex flex-col gap-2">
                     <p className="text-lg font-medium">Add title</p>

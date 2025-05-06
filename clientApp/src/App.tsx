@@ -4,9 +4,9 @@ import HomeScreen from "./routes/HomeScreen.tsx"
 import MainLayout from "./routes/MainLayout"
 import {createContext, useState} from "react"
 import {ErrorBoundary} from "react-error-boundary";
-import BlogScreen from "./routes/BlogScreen.tsx";
-import BlogCreateScreen from "./routes/BlogCreateScreen.tsx";
-import BlogDetailScreen from "./routes/BlogDetailScreen.tsx";
+import BlogScreen from "./routes/blog/BlogScreen.tsx"
+import BlogCreateScreen from "./routes/blog/BlogCreateScreen.tsx";
+import BlogDetailScreen from "./routes/blog/BlogDetailScreen.tsx";
 
 export interface appContext {
   token: string,

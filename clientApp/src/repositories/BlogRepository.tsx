@@ -6,6 +6,8 @@ export interface Blog {
     content: string
     author: string
     updatedAt: string
+    canEdit: boolean
+    canDelete: boolean
     comments: BlogComment[] | null
 }
 
@@ -24,13 +26,13 @@ export interface BlogRequest {
 }
 
 export default class BlogRepository {
-    static async getAll(): Promise<Blog[]> {
+    static async getAllBlogs(): Promise<Blog[]> {
         const response = await axios.get("/api/blog");
         // todo: error handling
         return response.data
     }
     
-    static async create(
+    static async createBlog(
         data: BlogRequest,
         token: string
     ): Promise<void> {
@@ -46,15 +48,42 @@ export default class BlogRepository {
         // todo: error handling
     }
     
-    static async get(id: number, token: string): Promise<Blog> {
+    static async getBlogById(id: number, token: string): Promise<Blog> {
         const response = await axios.get(`/api/blog/${id}`, {
             headers: {
                 Authorization: "Bearer " + token
             }
         });
-        console.log(response.data);
         // todo: error
         return response.data;
+    }
+    
+    static async updateBlog(
+        id: number,
+        title: string,
+        content: string,
+        token: string
+    ) {
+        const response = await axios.put(`/api/blog/${id}`, {
+            title,
+            content
+        }, {
+            headers: {
+                Authorization: "Bearer " + token
+            }
+        })
+        // todo: error
+        return response.data
+    }
+    
+    static async deleteBlog(id: number, token: string) {
+        const response = await axios.delete(`/api/blog/${id}`, {
+            headers: {
+                Authorization: "Bearer " + token
+            }
+        })
+        // todo: error
+        return response.data
     }
     
     static async createComment(
@@ -84,7 +113,7 @@ export default class BlogRepository {
         return response.data;
     }
     
-    static async editComment(
+    static async updateComment(
         id: number,
         content: string,
         token: string

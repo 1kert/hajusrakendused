@@ -9,7 +9,7 @@ export default function BlogScreen() {
     
     useEffect(() => {
         (async () => {
-            const blogs = await BlogRepository.getAll();
+            const blogs = await BlogRepository.getAllBlogs();
             setBlogs(blogs)
         })()
     }, [])
@@ -26,7 +26,7 @@ export default function BlogScreen() {
         <div className="w-full h-full flex flex-col p-8">
             <div className="flex items-center gap-4 w-[800px] mx-auto justify-between">
                 <h1 className="text-5xl">Blogs</h1>
-                <Link to="/blogs/create">
+                <Link to="/blog/create">
                     <Button>Create Blog</Button>
                 </Link>
             </div>

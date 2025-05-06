@@ -15,10 +15,10 @@ export default function BlogCreateScreen() {
     // todo: user styling for content?
     
     async function onCreateClick() {
-        await BlogRepository.create({
+        await BlogRepository.createBlog({
             content: content,
             title: title
-        }, appContext.token ?? "")
+        }, appContext.token)
         console.log("done")
         navigate("/blogs")
     }

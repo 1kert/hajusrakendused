@@ -124,7 +124,7 @@ export default function MapScreen() {
             description: description,
             id: id,
             title: title
-        }, appContext.token ?? "")
+        }, appContext.token)
 
         const updatedMarker = allMarkers.find(marker => marker.id === id)
         if (!updatedMarker) return
@@ -142,7 +142,7 @@ export default function MapScreen() {
     }
     
     async function onDeleteMarker(id: number) {
-        const response = await MarkerRepository.deleteMarker(id, appContext.token ?? "")
+        const response = await MarkerRepository.deleteMarker(id, appContext.token)
         if (!response) return
         const updatedAllMarkers = allMarkers.filter(marker => marker.id !== id)
         console.log(updatedAllMarkers)

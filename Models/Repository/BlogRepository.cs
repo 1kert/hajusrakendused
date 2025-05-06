@@ -14,6 +14,11 @@ public class BlogRepository(DatabaseContext dbContext)
         ICollection<UserRole> roles
     ) => userId.Equals(blog.CreatedBy) || roles.Contains(UserRole.Admin) || userId.Equals(comment.CreatedBy.Id);
     
+    private static bool CanEditBlog(BlogEntity blog, string userId) => userId.Equals(blog.CreatedBy);
+
+    private static bool CanDeleteBlog(BlogEntity blog, string userId, ICollection<UserRole> roles)
+        => userId.Equals(blog.CreatedBy) || roles.Contains(UserRole.Admin);
+    
     public async Task<bool> AddBlogAsync(BlogEntity blog)
     {
         dbContext.Blogs.Add(blog);
@@ -21,13 +26,13 @@ public class BlogRepository(DatabaseContext dbContext)
         return true;
     }
 
-    public async Task<BlogResponses[]> GetAllBlogsResponseAsync()
+    public async Task<BlogResponse[]> GetAllBlogsResponseAsync()
     {
         var blogs = await dbContext.Blogs
             .Include(x => x.CreatedByUser)
             .ToArrayAsync();
         
-        return blogs.Select(x => new BlogResponses
+        return blogs.Select(x => new BlogResponse
         {
             Id = x.Id,
             Title = x.Title,
@@ -38,7 +43,7 @@ public class BlogRepository(DatabaseContext dbContext)
         }).ToArray();
     }
     
-    public async Task<BlogResponses?> GetBlogResponseAsync(long id, string userId, ICollection<UserRole> roles)
+    public async Task<BlogResponse?> GetBlogByIdResponse(long id, string userId, ICollection<UserRole> roles)
     {
         var blog = await dbContext.Blogs
             .Include(x => x.Comments)
@@ -48,13 +53,15 @@ public class BlogRepository(DatabaseContext dbContext)
             .FirstOrDefaultAsync();
         if (blog is null) return null;
 
-        return new BlogResponses
+        return new BlogResponse
         {
             Id = blog.Id,
             Title = blog.Title,
             Content = blog.Content,
             Author = blog.CreatedByUser.UserName ?? "no name",
             UpdatedAt = blog.UpdatedAt,
+            CanEdit = blog.CreatedBy == userId,
+            CanDelete = blog.CreatedBy == userId || roles.Contains(UserRole.Admin),
             Comments = blog.Comments.Select(comment => new BlogCommentResponse
             {
                 Id = comment.Id,
@@ -65,6 +72,46 @@ public class BlogRepository(DatabaseContext dbContext)
                 CanDelete = CanDeleteComment(blog, comment, userId, roles)
             }).ToArray()
         };
+    }
+
+    public async Task<bool> UpdateBlogAsync(long blogId, string title, string content, string userId)
+    {
+        try
+        {
+            var blog = await dbContext.Blogs.FindAsync(blogId);
+            if (blog == null) return false;
+            if (!CanEditBlog(blog, userId)) return false;
+            
+            blog.Title = title;
+            blog.Content = content;
+            blog.UpdatedAt = DateTime.Now;
+            await dbContext.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
+        }
+    }
+    
+    public async Task<bool> DeleteBlogAsync(long blogId, string userId, ICollection<UserRole> userRoles)
+    {
+        try
+        {
+            var blog = await dbContext.Blogs.FindAsync(blogId);
+            if (blog == null) return false;
+            if (!CanDeleteBlog(blog, userId, userRoles)) return false;
+            
+            dbContext.Blogs.Remove(blog);
+            await dbContext.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
+        }
     }
 
     public async Task<bool> AddCommentAsync(string content, string userId, long blogId)

@@ -9,19 +9,19 @@ import BlogCreateScreen from "./routes/BlogCreateScreen.tsx";
 import BlogDetailScreen from "./routes/BlogDetailScreen.tsx";
 
 export interface appContext {
-  token: string | null,
+  token: string,
   setToken: (token: string) => void,
 }
 
 const initialContext: appContext = {
-  token: null,
+  token: "",
   setToken: () => {},
 }
 
 export const AppContext = createContext<appContext>(initialContext)
 
 function App() {
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token"))
+  const [token, setToken] = useState<string>(localStorage.getItem("token") ?? "")
   
   return ( // todo: when 401 unauthorized, re prompt login
     <AppContext.Provider value={{token, setToken}}>
@@ -32,7 +32,7 @@ function App() {
               <Route index Component={HomeScreen} />
               <Route path="/map" Component={MapScreen} />
               <Route path="/blogs" Component={BlogScreen} />
-              <Route path="/blogs/create" Component={BlogCreateScreen} />
+              <Route path="/blog/create" Component={BlogCreateScreen} />
               <Route path="/blog/:id" Component={BlogDetailScreen} />
             </Route>
           </Routes>

@@ -26,7 +26,7 @@ public class BlogController(BlogRepository blogRepository): ControllerBase
         var userId = user?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
         var userRoles = user?.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => Enum.Parse<UserRole>(x.Value));
         
-        return Ok(await blogRepository.GetBlogResponseAsync(id, userId ?? "", userRoles?.ToList() ?? []));
+        return Ok(await blogRepository.GetBlogByIdResponse(id, userId ?? "", userRoles?.ToList() ?? []));
     }
 
     [HttpPost]
@@ -48,6 +48,35 @@ public class BlogController(BlogRepository blogRepository): ControllerBase
         
         return !result ? StatusCode(StatusCodes.Status500InternalServerError) : Ok();
     }
+
+    [HttpPut("{id:long}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> UpdateBlog(long id, [FromBody] BlogCreateRequest request)
+    {
+        if (request.Title == null || request.Content == null) return BadRequest();
+        
+        var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) return StatusCode(StatusCodes.Status500InternalServerError);
+
+        if (!await blogRepository.UpdateBlogAsync(id, request.Title, request.Content, userId))
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        
+        return Ok();
+    }
+    
+    [HttpDelete("{id:long}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> DeleteBlog(long id)
+    {
+        var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) return StatusCode(StatusCodes.Status500InternalServerError);
+        var userRoles = User.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => Enum.Parse<UserRole>(x.Value));
+        
+        if(!await blogRepository.DeleteBlogAsync(id, userId, userRoles.ToList()))
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        
+        return Ok();
+    }
     
     [HttpPost("create")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -65,7 +94,7 @@ public class BlogController(BlogRepository blogRepository): ControllerBase
 
     [HttpPut("edit")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> EditComment([FromBody] BlogCommentUpdateRequest request)
+    public async Task<IActionResult> UpdateComment([FromBody] BlogCommentUpdateRequest request)
     {
         if (request.Content == null || request.Id == null) return BadRequest();
         

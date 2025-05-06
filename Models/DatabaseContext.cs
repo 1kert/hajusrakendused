@@ -8,6 +8,7 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : Identi
 {
     public DbSet<MarkerEntity> Markers { get; set; }
     public DbSet<BlogEntity> Blogs { get; set; }
+    public DbSet<BlogCommentEntity> Comments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -19,6 +20,21 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : Identi
                 .HasOne(x => x.CreatedByUser)
                 .WithMany()
                 .HasForeignKey(x => x.CreatedBy)
+                .IsRequired();
+
+            entity
+                .HasMany(x => x.Comments)
+                .WithOne(x => x.Blog)
+                .HasForeignKey("BlogId")
+                .IsRequired();
+        });
+
+        modelBuilder.Entity<BlogCommentEntity>(entity =>
+        {
+            entity
+                .HasOne(x => x.CreatedBy)
+                .WithMany()
+                .HasForeignKey("UserId")
                 .IsRequired();
         });
     }

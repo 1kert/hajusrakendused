@@ -2,9 +2,9 @@ using System.Security.Claims;
 using hajusrakendused.Models;
 using hajusrakendused.Models.http;
 using hajusrakendused.Models.Repository;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace hajusrakendused.Controllers;
@@ -16,14 +16,17 @@ public class BlogController(BlogRepository blogRepository): ControllerBase
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        return Ok(await blogRepository.GetAllBlogsResponsesAsync());
+        return Ok(await blogRepository.GetAllBlogsResponseAsync());
     }
     
-    [HttpGet("/{id:long}")]
-    public async Task<IActionResult> GetBlog(long id)
+    [HttpGet("{id:long}")]
+    public async Task<IActionResult> GetById(long id)
     {
-        Console.WriteLine(id); // todo
-        return Ok();
+        var user = (await HttpContext.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme)).Principal;
+        var userId = user?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+        var userRoles = user?.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => Enum.Parse<UserRole>(x.Value));
+        
+        return Ok(await blogRepository.GetBlogResponseAsync(id, userId ?? "", userRoles ?? []));
     }
 
     [HttpPost]
@@ -45,4 +48,14 @@ public class BlogController(BlogRepository blogRepository): ControllerBase
         
         return !result ? StatusCode(StatusCodes.Status500InternalServerError) : Ok();
     }
+    
+    // todo: create comment
+    [HttpPost]
+    public async Task<IActionResult> CreateComment(long blogId)
+    {
+        return Ok();
+    }
+    // todo: edit comment
+    // todo: get comments
+    // todo: delete comments
 }

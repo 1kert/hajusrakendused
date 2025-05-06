@@ -6,7 +6,13 @@ export interface StoreItem {
     price: number
 }
 
+export interface CartItem extends StoreItem {
+    quantity: number
+}
+
 export default class StoreRepository {
+    private static cartItems: CartItem[] = []
+    
     private static storeItems: StoreItem[] = [
         {
             id: 0,
@@ -82,14 +88,61 @@ export default class StoreRepository {
     }
     
     static async createStoreItem() {
-        // todo: when admin interface is implemented
+        // todo: if admin interface is implemented
     }
     
     static async deleteStoreItem() {
-        // todo: when admin interface is implemented
+        // todo: if admin interface is implemented
     }
     
     static async updateStoreItem() {
-        // todo: when admin interface is implemented
+        // todo: if admin interface is implemented
+    }
+    
+    // ----------------------------------
+
+    static async getCart(): Promise<CartItem[]> {
+        return this.cartItems
+    }
+    
+    static async addToCart(
+        item: StoreItem,
+        quantity: number,
+        token: string
+    ): Promise<boolean> {
+        this.cartItems.push({
+            quantity: quantity,
+            id: item.id,
+            image: item.image,
+            name: item.name,
+            description: item.description,
+            price: item.price
+        })
+        
+        return true
+    }
+    
+    static async removeFromCart(
+        itemId: number,
+        token: string
+    ): Promise<boolean> {
+        const index = this.cartItems.findIndex(item => itemId === item.id)
+        if (index > -1) return false
+        
+        this.cartItems.splice(index, 1)
+        return true
+    }
+    
+    static async updateCartItemQuantity(
+        itemId: number,
+        quantity: number,
+        token: string
+    ): Promise<boolean> {
+        const index = this.cartItems.findIndex(item => item.id === itemId)
+        if (index > -1) return false
+        
+        const item = this.cartItems[index]
+        item.quantity = quantity
+        return true
     }
 }

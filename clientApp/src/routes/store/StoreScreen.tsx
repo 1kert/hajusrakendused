@@ -1,7 +1,9 @@
 import {useEffect, useState} from "react";
 import StoreRepository, {StoreItem} from "../../repositories/StoreRepository.ts";
+import {useNavigate} from "react-router-dom";
 
 export default function StoreScreen() {
+    const navigate  = useNavigate();
     const [storeItems, setStoreItems] = useState<StoreItem[]>([])
     
     useEffect(() => {
@@ -12,7 +14,7 @@ export default function StoreScreen() {
     }, [])
     
     function onStoreItemClick(id: number) {
-        
+        navigate(`/store/${id}`)
     }
     
     return (
@@ -21,7 +23,6 @@ export default function StoreScreen() {
                 {storeItems.map(item => (
                     <StoreItemCard 
                         name={item.name}
-                        description={item.description}
                         image={item.image}
                         price={item.price}
                         onClick={() => onStoreItemClick(item.id)}
@@ -35,7 +36,6 @@ export default function StoreScreen() {
 function StoreItemCard(
     props: {
         name: string
-        description: string
         price: number
         image: string,
         onClick: () => void
@@ -46,7 +46,6 @@ function StoreItemCard(
             <img src={props.image} alt="" className="size-52 w-full rounded-md" />
             <p className="text-md">{props.name}</p>
             <p className="text-lg font-bold">${props.price}</p>
-            {/*<p className="line-clamp-0">{props.description}</p>*/}
         </div>
     )
 }

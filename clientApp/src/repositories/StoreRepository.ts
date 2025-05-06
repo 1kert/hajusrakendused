@@ -77,6 +77,10 @@ export default class StoreRepository {
         return this.storeItems
     }
     
+    static async getStoreItemById(id: number): Promise<StoreItem | undefined> {
+        return this.storeItems.find(item => item.id === id)
+    }
+    
     static async createStoreItem() {
         // todo: when admin interface is implemented
     }

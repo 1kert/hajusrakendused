@@ -5,6 +5,15 @@ namespace hajusrakendused.Models.Repository;
 
 public class BlogRepository(DatabaseContext dbContext)
 {
+    private static bool CanEditComment(BlogCommentEntity comment, string userId) => comment.CreatedBy.Id.Equals(userId);
+
+    private static bool CanDeleteComment(
+        BlogEntity blog, 
+        BlogCommentEntity comment, 
+        string userId,
+        ICollection<UserRole> roles
+    ) => userId == blog.CreatedBy || roles.Contains(UserRole.Admin) || userId == comment.CreatedBy.UserName;
+    
     public async Task<bool> AddBlogAsync(BlogEntity blog)
     {
         dbContext.Blogs.Add(blog);
@@ -12,13 +21,13 @@ public class BlogRepository(DatabaseContext dbContext)
         return true;
     }
 
-    public async Task<BlogResponse[]> GetAllBlogsResponseAsync()
+    public async Task<BlogResponses[]> GetAllBlogsResponseAsync()
     {
         var blogs = await dbContext.Blogs
             .Include(x => x.CreatedByUser)
             .ToArrayAsync();
         
-        return blogs.Select(x => new BlogResponse
+        return blogs.Select(x => new BlogResponses
         {
             Id = x.Id,
             Title = x.Title,
@@ -29,7 +38,7 @@ public class BlogRepository(DatabaseContext dbContext)
         }).ToArray();
     }
     
-    public async Task<BlogResponse?> GetBlogResponseAsync(long id, string userId, IEnumerable<UserRole> roles)
+    public async Task<BlogResponses?> GetBlogResponseAsync(long id, string userId, ICollection<UserRole> roles)
     {
         var blog = await dbContext.Blogs
             .Include(x => x.Comments)
@@ -39,7 +48,7 @@ public class BlogRepository(DatabaseContext dbContext)
             .FirstOrDefaultAsync();
         if (blog is null) return null;
 
-        return new BlogResponse
+        return new BlogResponses
         {
             Id = blog.Id,
             Title = blog.Title,
@@ -52,13 +61,82 @@ public class BlogRepository(DatabaseContext dbContext)
                 Content = comment.Content,
                 Author = comment.CreatedBy.UserName ?? "no name",
                 UpdatedAt = comment.UpdatedAt,
-                CanEdit = userId == comment.CreatedBy.Id,
-                CanDelete = userId == blog.CreatedBy || roles.Contains(UserRole.Admin) || userId == comment.CreatedBy.UserName
+                CanEdit = CanEditComment(comment, userId),
+                CanDelete = CanDeleteComment(blog, comment, userId, roles)
             }).ToArray()
         };
     }
-    
-    
-    
-    // todo: CRUD
+
+    public async Task<bool> AddCommentAsync(string content, string userId, long blogId)
+    {
+        try
+        {
+            var blog = await dbContext.Blogs.FindAsync(blogId);
+            if (blog == null) return false;
+            
+            dbContext.Comments.Add(new BlogCommentEntity
+            {
+                Content = content,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                CreatedById = userId,
+                BlogId = blogId
+            });
+            await dbContext.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
+        }
+    }
+
+    public async Task<bool> UpdateCommentContentAsync(long commentId, string content, string userId)
+    {
+        try
+        {
+            var comment = await dbContext.Comments
+                .Include(x => x.CreatedBy)
+                .FirstOrDefaultAsync(x => x.Id == commentId);
+            if (comment == null) return false;
+
+            var canEdit = CanEditComment(comment, userId);
+            if (!canEdit) return false;
+            
+            comment.Content = content;
+            comment.UpdatedAt = DateTime.Now;
+            await dbContext.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
+        }
+    }
+
+    public async Task<bool> DeleteCommentAsync(long commentId, string userId, ICollection<UserRole> roles)
+    {
+        try
+        {
+            var comment = await dbContext.Comments
+                .Include(x => x.Blog)
+                .Include(x => x.CreatedBy)
+                .FirstOrDefaultAsync(x => x.Id == commentId);
+            if (comment == null) return false;
+            
+            var canDelete = CanDeleteComment(comment.Blog, comment, userId, roles);
+            if (!canDelete) return false;
+            
+            dbContext.Comments.Remove(comment);
+            await dbContext.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
+        }
+    }
 }

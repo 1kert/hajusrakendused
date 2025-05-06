@@ -20,6 +20,10 @@ public class BlogCommentEntity
     public required string Content { get; set; }
     public required DateTime CreatedAt { get; set; }
     public required DateTime UpdatedAt { get; set; }
+    
+    public required string CreatedById { get; set; }
     public IdentityUser CreatedBy { get; set; } = null!;
+    
+    public required long BlogId { get; set; }
     public BlogEntity Blog { get; set; } = null!;
 }

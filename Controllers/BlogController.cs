@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using hajusrakendused.Models;
-using hajusrakendused.Models.http;
+using hajusrakendused.Models.Http;
 using hajusrakendused.Models.Repository;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -26,7 +26,7 @@ public class BlogController(BlogRepository blogRepository): ControllerBase
         var userId = user?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
         var userRoles = user?.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => Enum.Parse<UserRole>(x.Value));
         
-        return Ok(await blogRepository.GetBlogResponseAsync(id, userId ?? "", userRoles ?? []));
+        return Ok(await blogRepository.GetBlogResponseAsync(id, userId ?? "", userRoles?.ToList() ?? []));
     }
 
     [HttpPost]
@@ -49,13 +49,42 @@ public class BlogController(BlogRepository blogRepository): ControllerBase
         return !result ? StatusCode(StatusCodes.Status500InternalServerError) : Ok();
     }
     
-    // todo: create comment
-    [HttpPost]
-    public async Task<IActionResult> CreateComment(long blogId)
+    [HttpPost("create")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> CreateComment([FromBody] BlogCommentUpdateRequest request)
     {
+        if (request.Content == null || request.BlogId == null) return BadRequest();
+        
+        var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) return StatusCode(StatusCodes.Status500InternalServerError);
+
+        if (!await blogRepository.AddCommentAsync(request.Content, userId, request.BlogId.Value)) return StatusCode(StatusCodes.Status500InternalServerError);
+        
         return Ok();
     }
-    // todo: edit comment
-    // todo: get comments
-    // todo: delete comments
+
+    [HttpPut("edit")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> EditComment([FromBody] BlogCommentUpdateRequest request)
+    {
+        if (request.Content == null || request.Id == null || request.BlogId == null) return BadRequest();
+        
+        var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) return StatusCode(StatusCodes.Status500InternalServerError);
+        
+        if (!await blogRepository.UpdateCommentContentAsync(request.Id.Value, request.Content, userId)) return StatusCode(StatusCodes.Status500InternalServerError);
+        return Ok();
+    }
+
+    [HttpDelete("delete/{id:long}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> DeleteComment(long id)
+    {
+        var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) return StatusCode(StatusCodes.Status500InternalServerError);
+        
+        var userRoles = User.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => Enum.Parse<UserRole>(x.Value));
+        if (!await blogRepository.DeleteCommentAsync(id, userId, userRoles.ToList())) return StatusCode(StatusCodes.Status500InternalServerError);
+        return Ok();
+    }
 }

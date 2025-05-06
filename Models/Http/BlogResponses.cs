@@ -1,6 +1,6 @@
 namespace hajusrakendused.Models.http;
 
-public class BlogResponse
+public class BlogResponses
 {
     public required long Id { get; set; }
     public required string Title { get; set; }

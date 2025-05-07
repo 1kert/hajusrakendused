@@ -1,4 +1,4 @@
-import {useContext, useEffect, useState} from "react";
+import {useContext, useEffect, useRef, useState} from "react";
 import StoreRepository, {CartItem} from "../../repositories/StoreRepository.ts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table.tsx";
 import {AppContext} from "../../App.tsx";
@@ -8,6 +8,7 @@ import { Input } from "../../components/ui/input.tsx";
 export default function StoreCartScreen() {
     const context = useContext(AppContext)
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const quantityTimeouts = useRef<Record<number, NodeJS.Timeout>>({})
     
     useEffect(() => {
         (async () => {
@@ -34,11 +35,19 @@ export default function StoreCartScreen() {
         item: CartItem,
         quantity: string
     ) {
-        console.log(item, quantity)
         const num = Number(quantity)
         if(Number.isNaN(num)) return
+        
         item.quantity = num
         setCartItems([...cartItems])
+        
+        if (quantityTimeouts.current[item.id]) {
+            clearTimeout(quantityTimeouts.current[item.id])
+        }
+        
+        quantityTimeouts.current[item.id] = setTimeout(async () => {
+            await StoreRepository.updateCartItemQuantity(item.id, num, context.token)
+        }, 500)
     }
     
     return (

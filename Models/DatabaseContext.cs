@@ -48,4 +48,19 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : Identi
                 .UsingEntity<CartEntity>();
         });
     }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+    {
+        ChangeTracker.DetectChanges();
+
+        foreach (var entry in ChangeTracker.Entries())
+        {
+            if (entry.State is EntityState.Added or EntityState.Modified)
+            {
+                
+            }
+        }
+        
+        return base.SaveChangesAsync(cancellationToken);
+    }
 }

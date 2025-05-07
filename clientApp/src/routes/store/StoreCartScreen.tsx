@@ -20,7 +20,7 @@ export default function StoreCartScreen() {
     }, [cartItems])
     
     async function refreshCart() {
-        const items = await StoreRepository.getCart()
+        const items = await StoreRepository.getCart(context.token)
         setCartItems(items)
     }
     

@@ -19,7 +19,6 @@ export default function BlogCreateScreen() {
             content: content,
             title: title
         }, appContext.token)
-        console.log("done")
         navigate("/blogs")
     }
     

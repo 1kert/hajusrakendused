@@ -54,6 +54,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddScoped<MarkerRepository>();
 builder.Services.AddScoped<WeatherRepository>();
 builder.Services.AddScoped<BlogRepository>();
+builder.Services.AddScoped<StoreRepository>();
 builder.Services.AddDbContext<DatabaseContext>(options => options
     .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 

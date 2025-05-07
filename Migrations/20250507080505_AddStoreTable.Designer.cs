@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using hajusrakendused.Models;
 
@@ -11,9 +12,11 @@ using hajusrakendused.Models;
 namespace hajusrakendused.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250507080505_AddStoreTable")]
+    partial class AddStoreTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,21 @@ namespace hajusrakendused.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("IdentityUserStoreItemEntity", b =>
+                {
+                    b.Property<long>("StoreItemEntityId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("UsersId")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("StoreItemEntityId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("IdentityUserStoreItemEntity");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -285,24 +303,6 @@ namespace hajusrakendused.Migrations
                     b.ToTable("Blogs");
                 });
 
-            modelBuilder.Entity("hajusrakendused.Models.CartEntity", b =>
-                {
-                    b.Property<long>("StoreItemId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.HasKey("StoreItemId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Carts");
-                });
-
             modelBuilder.Entity("hajusrakendused.Models.MarkerEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -365,6 +365,21 @@ namespace hajusrakendused.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("StoreItems");
+                });
+
+            modelBuilder.Entity("IdentityUserStoreItemEntity", b =>
+                {
+                    b.HasOne("hajusrakendused.Models.StoreItemEntity", null)
+                        .WithMany()
+                        .HasForeignKey("StoreItemEntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -446,25 +461,6 @@ namespace hajusrakendused.Migrations
                         .IsRequired();
 
                     b.Navigation("CreatedByUser");
-                });
-
-            modelBuilder.Entity("hajusrakendused.Models.CartEntity", b =>
-                {
-                    b.HasOne("hajusrakendused.Models.StoreItemEntity", "StoreItem")
-                        .WithMany()
-                        .HasForeignKey("StoreItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("StoreItem");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("hajusrakendused.Models.BlogEntity", b =>

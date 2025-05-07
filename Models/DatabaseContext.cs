@@ -9,6 +9,8 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : Identi
     public DbSet<MarkerEntity> Markers { get; set; }
     public DbSet<BlogEntity> Blogs { get; set; }
     public DbSet<BlogCommentEntity> Comments { get; set; }
+    public DbSet<StoreItemEntity> StoreItems { get; set; }
+    public DbSet<CartEntity> Carts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -36,6 +38,14 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : Identi
                 .WithMany()
                 .HasForeignKey(x => x.CreatedById)
                 .IsRequired();
+        });
+
+        modelBuilder.Entity<StoreItemEntity>(entity =>
+        {
+            entity
+                .HasMany(x => x.Users)
+                .WithMany()
+                .UsingEntity<CartEntity>();
         });
     }
 }

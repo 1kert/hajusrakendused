@@ -11,6 +11,7 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : Identi
     public DbSet<BlogCommentEntity> Comments { get; set; }
     public DbSet<StoreItemEntity> StoreItems { get; set; }
     public DbSet<CartEntity> Carts { get; set; }
+    public DbSet<FavoriteGameEntity> FavoriteGames { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -49,16 +50,16 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : Identi
         });
     }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
     {
         ChangeTracker.DetectChanges();
 
         foreach (var entry in ChangeTracker.Entries())
         {
-            if (entry.State is EntityState.Added or EntityState.Modified)
-            {
-                
-            }
+            if (entry.State is not (EntityState.Added or EntityState.Modified)) continue;
+            
+            entry.Property("UpdatedAt").CurrentValue = DateTime.Now;
+            if (entry.State == EntityState.Added) entry.Property("CreatedAt").CurrentValue = DateTime.Now;
         }
         
         return base.SaveChangesAsync(cancellationToken);

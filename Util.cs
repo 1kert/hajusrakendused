@@ -11,3 +11,9 @@ public static class Extensions
     public static UserRole[] GetUserRoles(this ClaimsPrincipal principal)
         => principal.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => Enum.Parse<UserRole>(x.Value)).ToArray();
 }
+
+public enum ErrorType
+{
+    NotFound,
+    Error
+}

@@ -31,6 +31,9 @@ export default function HomeScreen() {
                     <NavigationCard title="Store"
                                     description="Give us your money in exchange for things you probably don’t need. Minimal guilt, maximum cart size."
                                     onClick={() => navigate("/store")}/>
+                    <NavigationCard title="Favourite game API"
+                                    description=""
+                                    onClick={() => navigate("/favourite-game")}/>
                 </div>
             </div>
             {/*todo: loading*/}

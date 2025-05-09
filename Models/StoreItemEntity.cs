@@ -15,7 +15,7 @@ public class StoreItemEntity
 
 public class CartEntity
 {
-    public string UserId { get; set; } 
+    public string UserId { get; set; } = null!;
     public IdentityUser User { get; set; } = null!;
     public long StoreItemId { get; set; }
     public StoreItemEntity StoreItem { get; set; } = null!;

@@ -48,6 +48,14 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : Identi
                 .WithMany()
                 .UsingEntity<CartEntity>();
         });
+
+        modelBuilder.Entity<FavoriteGameEntity>(entity =>
+        {
+            entity
+                .HasOne(x => x.User)
+                .WithMany()
+                .IsRequired();
+        });
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
@@ -56,8 +64,6 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : Identi
 
         foreach (var entry in ChangeTracker.Entries())
         {
-            if (entry.State is not (EntityState.Added or EntityState.Modified)) continue;
-            
             entry.Property("UpdatedAt").CurrentValue = DateTime.Now;
             if (entry.State == EntityState.Added) entry.Property("CreatedAt").CurrentValue = DateTime.Now;
         }

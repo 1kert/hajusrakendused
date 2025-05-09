@@ -13,7 +13,7 @@ import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {useContext, useEffect, useState} from "react";
 import {z} from "zod";
-import {useMutation} from "@tanstack/react-query";
+import {useMutation, useQuery} from "@tanstack/react-query";
 import axios from "axios";
 import getAuthHeader from "../../repositories/AxiosHeader.ts";
 import {AppContext} from "../../App.tsx";
@@ -36,20 +36,26 @@ type formSchemaType = z.infer<typeof formSchema>
 
 export default function FavouriteGameScreen() {
     const context = useContext(AppContext)
-    const mutation = useMutation({
-        mutationFn: async (data: object) => {
-            return await axios.post("/api/favourite", data, getAuthHeader(context.token))
-        }
-    })
     const form = useForm<formSchemaType>({
         resolver: zodResolver(formSchema),
         defaultValues: { name: "", genres: "", image: "", description: "", developer: "" }
     })
 
     const [genres, setGenres] = useState<string[]>([])
+    const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
     const genreText = form.watch("genres")
     
-    const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
+    const mutation = useMutation({
+        mutationFn: async (data: object) => {
+            return await axios.post("/api/favourite", data, getAuthHeader(context.token))
+        }
+    })
+    const query = useQuery({
+        queryKey: ["games"],
+        queryFn: async () => {
+            return await axios.get("/api/favourite", getAuthHeader(context.token))
+        }
+    })
 
     useEffect(() => {
         if (genreText.length <= 1) return
@@ -183,6 +189,32 @@ export default function FavouriteGameScreen() {
                     </Form>
                 </DialogContent>
             </Dialog>
+            
+            <div>
+                {query.isSuccess && query.data.data.map((data: any) => (
+                    <GameInfoCard 
+                        name={data.name}
+                        description={data.description}
+                        imageUrl={data.image}
+                        genres={data.genres}
+                        developer={data.developer}
+                    />
+                ))}
+            </div>
         </div>
+    )
+}
+
+function GameInfoCard(
+    props: {
+        name: string
+        description: string
+        imageUrl: string
+        genres: string[]
+        developer: string
+    }
+) {
+    return (
+        <p>{props.name}</p>
     )
 }

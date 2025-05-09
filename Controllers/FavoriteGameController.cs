@@ -17,6 +17,17 @@ public class FavoriteGameController(FavoriteGameRepository favoriteGameRepositor
         return result.IsSuccess ? Ok(result.Data) : result.ErrorType.GetResult();
     }
     
+    [HttpGet]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> GetAllFavouriteGamesForCurrent()
+    {
+        var userId = User.GetUserId();
+        if (userId == null) return Unauthorized();
+        
+        var result = await favoriteGameRepository.GetAllGamesResponseAsync(userId);
+        return result.IsSuccess ? Ok(result.Data) : result.ErrorType.GetResult();
+    }
+    
     [HttpDelete("{id:long}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> DeleteFavouriteGame(long id)

@@ -19,7 +19,7 @@ public class FavoriteGameRepository(DatabaseContext databaseContext)
                     Description = x.Description,
                     Image = x.Image,
                     Genres = x.GenreJson,
-                    ReleaseDate = x.ReleaseDate
+                    Developer = x.Developer
                 })
                 .ToArrayAsync();
 
@@ -38,7 +38,7 @@ public class FavoriteGameRepository(DatabaseContext databaseContext)
         string description,
         string image,
         string[] genres,
-        DateTime releaseDate)
+        string developer)
     {
         try
         {
@@ -48,7 +48,7 @@ public class FavoriteGameRepository(DatabaseContext databaseContext)
                 Description = description,
                 Image = image,
                 GenreJson = JsonSerializer.Serialize(genres),
-                ReleaseDate = releaseDate
+                Developer = developer
             };
             databaseContext.FavoriteGames.Add(game);
             databaseContext.Entry(game).Property("UserId").CurrentValue = userId;
@@ -69,7 +69,7 @@ public class FavoriteGameRepository(DatabaseContext databaseContext)
         string? description,
         string? image,
         string[]? genres,
-        DateTime? releaseDate)
+        string? developer)
     {
         try
         {
@@ -82,7 +82,7 @@ public class FavoriteGameRepository(DatabaseContext databaseContext)
             if (description != null) game.Description = description;
             if (image != null) game.Image = image;
             if (genres != null) game.GenreJson = JsonSerializer.Serialize(genres);
-            if (releaseDate != null) game.ReleaseDate = releaseDate.Value;
+            if (developer != null) game.Developer = developer;
             
             await databaseContext.SaveChangesAsync();
             return null;

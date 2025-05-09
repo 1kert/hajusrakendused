@@ -42,7 +42,7 @@ public class FavoriteGameController(FavoriteGameRepository favoriteGameRepositor
             request.Description,
             request.Image,
             request.Genres,
-            request.ReleaseDate
+            request.Developer
         );
         
         return result == null ? Ok() : result.GetResult();
@@ -61,7 +61,7 @@ public class FavoriteGameController(FavoriteGameRepository favoriteGameRepositor
             request.Description!,
             request.Image!,
             request.Genres!,
-            request.ReleaseDate!.Value
+            request.Developer!
         );
         
         return result == null ? Ok() : result.GetResult();

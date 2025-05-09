@@ -6,7 +6,7 @@ public class FavoriteGameRequest
     public string? Description { get; set; }
     public string? Image { get; set; }
     public string[]? Genres { get; set; }
-    public DateTime? ReleaseDate { get; set; }
+    public string? Developer { get; set; }
 }
 
 public class FavoriteGameResponse
@@ -16,5 +16,5 @@ public class FavoriteGameResponse
     public string? Description { get; set; }
     public string? Image { get; set; }
     public string? Genres { get; set; }
-    public DateTime? ReleaseDate { get; set; } 
+    public string? Developer { get; set; }
 }

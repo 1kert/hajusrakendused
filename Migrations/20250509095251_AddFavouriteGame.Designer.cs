@@ -12,7 +12,7 @@ using hajusrakendused.Models;
 namespace hajusrakendused.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20250508071744_AddFavouriteGame")]
+    [Migration("20250509095251_AddFavouriteGame")]
     partial class AddFavouriteGame
     {
         /// <inheritdoc />
@@ -322,6 +322,11 @@ namespace hajusrakendused.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("varchar(128)");
 
+                    b.Property<string>("Developer")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
+
                     b.Property<string>("GenreJson")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -332,13 +337,10 @@ namespace hajusrakendused.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
 
-                    b.Property<DateTime>("ReleaseDate")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("varchar(60)");
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");

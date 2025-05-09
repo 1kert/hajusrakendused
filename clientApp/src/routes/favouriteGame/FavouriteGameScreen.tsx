@@ -11,8 +11,12 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "..
 import {Input} from "../../components/ui/input.tsx";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import {z} from "zod";
+import {useMutation} from "@tanstack/react-query";
+import axios from "axios";
+import getAuthHeader from "../../repositories/AxiosHeader.ts";
+import {AppContext} from "../../App.tsx";
 
 const formSchema = z.object({
     name: z
@@ -31,6 +35,12 @@ const formSchema = z.object({
 type formSchemaType = z.infer<typeof formSchema>
 
 export default function FavouriteGameScreen() {
+    const context = useContext(AppContext)
+    const mutation = useMutation({
+        mutationFn: async (data: object) => {
+            return await axios.post("/api/favourite", data, getAuthHeader(context.token))
+        }
+    })
     const form = useForm<formSchemaType>({
         resolver: zodResolver(formSchema),
         defaultValues: { name: "", genres: "", image: "", description: "", developer: "" }
@@ -65,6 +75,13 @@ export default function FavouriteGameScreen() {
 
     function onSubmit(data: formSchemaType) {
         setIsAddDialogVisible(false)
+        mutation.mutate({
+            title: data.name,
+            description: data.description,
+            genres: genres,
+            developer: data.developer,
+            image: data.image
+        })
     }
 
     return (

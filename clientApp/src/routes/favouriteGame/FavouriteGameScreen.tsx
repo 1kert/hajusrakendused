@@ -11,13 +11,20 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "..
 import {Input} from "../../components/ui/input.tsx";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {useContext, useEffect, useState} from "react";
+import {useContext, useEffect, useRef, useState} from "react";
 import {z} from "zod";
 import {useMutation, useQuery} from "@tanstack/react-query";
 import axios from "axios";
 import getAuthHeader from "../../repositories/AxiosHeader.ts";
 import {AppContext} from "../../App.tsx";
 import Loading from "../../components/Loading.tsx";
+import {EllipsisVertical} from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from "../../components/ui/dropdown-menu.tsx";
 
 const formSchema = z.object({
     name: z
@@ -52,18 +59,28 @@ export default function FavouriteGameScreen() {
     })
 
     const [genres, setGenres] = useState<string[]>([])
-    const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
+    const [isAddDialogVisible, setIsAddDialogVisible] = useState(false)
+    const [isEditing, setIsEditing] = useState(false)
+    const editingGame = useRef<FavouriteGame>()
     const genreText = form.watch("genres")
     
-    const mutation = useMutation({
+    const createGameMutation = useMutation({
         mutationFn: async (data: object) => {
             return await axios.post("/api/favourite", data, getAuthHeader(context.token))
         }
     })
-    const userFavouritesQuery = useQuery<FavouriteGame[]>({
+    const getGamesQuery = useQuery<FavouriteGame[]>({
         queryKey: ["favourite-games"],
         queryFn: async () => {
             return (await axios.get("/api/favourite", getAuthHeader(context.token))).data
+        }
+    })
+    const updateGameMutation = useMutation({
+        mutationFn: async (data: Partial<FavouriteGame>) => {
+            return await axios.put("/api/favourite", data, getAuthHeader(context.token))
+        },
+        onSuccess: async () => {
+            await getGamesQuery.refetch()
         }
     })
 
@@ -91,13 +108,56 @@ export default function FavouriteGameScreen() {
 
     function onSubmit(data: formSchemaType) {
         setIsAddDialogVisible(false)
-        mutation.mutate({
+        
+        if (isEditing) {
+            if (!editingGame.current) throw new Error("Can't edit game")
+            
+            const changes: Partial<FavouriteGame> = {}
+            for (const key in data) {
+                if (key === "genres") continue
+                if (data[key as keyof formSchemaType] !== editingGame.current[key as keyof FavouriteGame]) {
+                    const value = data[key as keyof formSchemaType]
+                    if (!value) throw new Error("Can't edit game")
+                    changes[key as keyof FavouriteGame] = value
+                }
+            }
+            
+            changes.genres = genres
+            changes.id = editingGame.current.id
+            updateGameMutation.mutate(changes)
+            
+            return
+        }
+        
+        createGameMutation.mutate({
             title: data.name,
             description: data.description,
             genres: genres,
             developer: data.developer,
             image: data.image
         })
+    }
+    
+    function onGameEditClick(game: FavouriteGame) {
+        form.setValue("name", game.title)
+        form.setValue("description", game.description)
+        form.setValue("genres", "")
+        form.setValue("developer", game.developer)
+        form.setValue("image", game.image)
+        setGenres(game.genres)
+        setIsEditing(true)
+        editingGame.current = game
+        setIsAddDialogVisible(true)
+    }
+    
+    function onGameCreateClick() {
+        setIsEditing(false)
+        setGenres([])
+        form.reset()
+    }
+    
+    function onGameDelete(game: FavouriteGame) {
+        
     }
     
     function getApiUrl(): string {
@@ -109,7 +169,7 @@ export default function FavouriteGameScreen() {
         <div className="flex flex-col w-[700px] mx-auto py-8">
             <Dialog open={isAddDialogVisible} onOpenChange={setIsAddDialogVisible}>
                 <DialogTrigger asChild>
-                    <Button className="ml-auto">Add game</Button>
+                    <Button onClick={onGameCreateClick} className="ml-auto">Add game</Button>
                 </DialogTrigger>
                 <DialogContent>
                     <Form {...form}>
@@ -198,7 +258,7 @@ export default function FavouriteGameScreen() {
                             />
 
                             <DialogFooter>
-                                <Button className="mt-2" type="submit">Create</Button>
+                                <Button className="mt-2" type="submit">{!isEditing ? "Create" : "Edit"}</Button>
                             </DialogFooter>
                         </form>
                     </Form>
@@ -211,24 +271,52 @@ export default function FavouriteGameScreen() {
             </div>
 
             <div className="mt-4 gap-4 grid grid-cols-2 mx-auto">
-                {userFavouritesQuery.isLoading && <Loading />}
-                {userFavouritesQuery.isSuccess && userFavouritesQuery.data.map(game => (
-                    <GameInfoCard key={game.id} game={game} />
+                {getGamesQuery.isLoading && <Loading />}
+                {getGamesQuery.isSuccess && getGamesQuery.data.map(game => (
+                    <GameInfoCard 
+                        key={game.id}
+                        game={game}
+                        onEditClick={onGameEditClick}
+                        onDeleteClick={onGameDelete}
+                    />
                 ))}
             </div>
         </div>
     )
 }
 
-function GameInfoCard(props: { game: FavouriteGame }) {
+function GameInfoCard(
+    props: {
+        game: FavouriteGame,
+        onEditClick: (game: FavouriteGame) => void,
+        onDeleteClick: (game: FavouriteGame) => void
+    }
+) {
     const game = props.game
+    const [isDropDownVisible, setIsDropDownVisible] = useState(false)
+    
+    function onEditClick() {
+        setIsDropDownVisible(false)
+        props.onEditClick(game)
+    }
     
     return (
         <div className="flex flex-col gap-1 p-3 bg-gray-300 w-[300px] rounded-md shadow-md">
             <div className="w-full rounded-md h-64 overflow-hidden shadow-md">
                 <img src={game.image} alt="" className="w-full h-full object-cover" />
             </div>
-            <p className="font-bold text-xl">{game.title}</p>
+            <div className="flex justify-between w-full items-center mt-2">
+                <p className="font-bold text-xl">{game.title}</p>
+                <DropdownMenu open={isDropDownVisible} onOpenChange={setIsDropDownVisible} >
+                    <DropdownMenuTrigger>
+                        <EllipsisVertical className="hover:cursor-pointer"/>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem onClick={onEditClick}>Edit</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => props.onDeleteClick(game)} className="text-red-500">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
             <p className="text-sm mb-4">{game.description}</p>
             <p>Genres: {game.genres.join(", ")}</p>
             <p>Developer: {game.developer}</p>

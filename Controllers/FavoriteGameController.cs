@@ -39,16 +39,16 @@ public class FavoriteGameController(FavoriteGameRepository favoriteGameRepositor
         return result == null ? Ok() : result.GetResult();
     }
     
-    [HttpPut("{id:long}")]
+    [HttpPut]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> UpdateFavouriteGame([FromBody] FavoriteGameRequest request, long id)
+    public async Task<IActionResult> UpdateFavouriteGame([FromBody] FavouriteGameUpdateRequest request)
     {
         var userId = User.GetUserId();
         if (userId == null) return Unauthorized();
 
         var result = await favoriteGameRepository.UpdateGameAsync(
             userId,
-            id,
+            request.Id!.Value,
             request.Title,
             request.Description,
             request.Image,
@@ -61,7 +61,7 @@ public class FavoriteGameController(FavoriteGameRepository favoriteGameRepositor
     
     [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> CreateFavouriteGame([FromBody] FavoriteGameRequest request)
+    public async Task<IActionResult> CreateFavouriteGame([FromBody] FavouriteGameRequest request)
     {
         var userId = User.GetUserId();
         if (userId == null) return Unauthorized();

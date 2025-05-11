@@ -6,13 +6,13 @@ namespace hajusrakendused.Models.Repository;
 
 public class FavoriteGameRepository(DatabaseContext databaseContext)
 {
-    public async Task<Result<FavoriteGameResponse[]>> GetAllGamesResponseAsync(string userId)
+    public async Task<Result<FavouriteGameResponse[]>> GetAllGamesResponseAsync(string userId)
     {
         try
         {
             var games = await databaseContext.FavoriteGames
                 .Where(x => EF.Property<string>(x, "UserId") == userId)
-                .Select(x => new FavoriteGameResponse
+                .Select(x => new FavouriteGameResponse
                 {
                     Id = x.Id,
                     Title = x.Title,
@@ -23,12 +23,12 @@ public class FavoriteGameRepository(DatabaseContext databaseContext)
                 })
                 .ToArrayAsync();
 
-            return Result<FavoriteGameResponse[]>.Success(games);
+            return Result<FavouriteGameResponse[]>.Success(games);
         }
         catch (Exception e)
         {
             // todo: db errors
-            return Result<FavoriteGameResponse[]>.Error(ErrorType.Unknown);
+            return Result<FavouriteGameResponse[]>.Error(ErrorType.Unknown);
         }
     }
 

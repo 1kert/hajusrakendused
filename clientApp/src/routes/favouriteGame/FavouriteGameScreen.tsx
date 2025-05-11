@@ -13,7 +13,7 @@ import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {useContext, useEffect, useRef, useState} from "react";
 import {z} from "zod";
-import {useMutation, useQuery} from "@tanstack/react-query";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import axios from "axios";
 import getAuthHeader from "../../repositories/AxiosHeader.ts";
 import {AppContext} from "../../App.tsx";
@@ -29,15 +29,15 @@ import {
 const formSchema = z.object({
     name: z
         .string()
-        .min(5),
+        .min(1),
     description: z
         .string()
-        .min(5),
+        .min(1),
     image: z.string(),
     genres: z.string(),
     developer: z
         .string()
-        .min(5)
+        .min(1)
 })
 
 type formSchemaType = z.infer<typeof formSchema>
@@ -52,6 +52,7 @@ interface FavouriteGame {
 }
 
 export default function FavouriteGameScreen() {
+    const client = useQueryClient()
     const context = useContext(AppContext)
     const form = useForm<formSchemaType>({
         resolver: zodResolver(formSchema),
@@ -67,7 +68,8 @@ export default function FavouriteGameScreen() {
     const createGameMutation = useMutation({
         mutationFn: async (data: object) => {
             return await axios.post("/api/favourite", data, getAuthHeader(context.token))
-        }
+        },
+        onSettled: () => client.invalidateQueries({queryKey: ["favourite-games"]}),
     })
     const getGamesQuery = useQuery<FavouriteGame[]>({
         queryKey: ["favourite-games"],
@@ -79,9 +81,19 @@ export default function FavouriteGameScreen() {
         mutationFn: async (data: Partial<FavouriteGame>) => {
             return await axios.put("/api/favourite", data, getAuthHeader(context.token))
         },
-        onSuccess: async () => {
-            await getGamesQuery.refetch()
-        }
+        onMutate: async (newGame: Partial<FavouriteGame>) => {
+            await client.cancelQueries({ queryKey: ["favourite-games"] })
+            const previousGames: FavouriteGame[] | undefined = client.getQueryData(["favourite-games"])
+            client.setQueryData(["favourite-games"], previousGames?.map(game => {
+                if (game.id !== newGame.id) return game
+                return { ...game, ...newGame }
+            }))
+            return { previousGames }
+        },
+        onError: async (_, __, context) => {
+            client.setQueryData(["favourite-games"], context!.previousGames)
+        },
+        onSettled: () => client.invalidateQueries({ queryKey: ["favourite-games"] })
     })
 
     useEffect(() => {
@@ -112,19 +124,14 @@ export default function FavouriteGameScreen() {
         if (isEditing) {
             if (!editingGame.current) throw new Error("Can't edit game")
             
-            const changes: Partial<FavouriteGame> = {}
-            for (const key in data) {
-                if (key === "genres") continue
-                if (data[key as keyof formSchemaType] !== editingGame.current[key as keyof FavouriteGame]) {
-                    const value = data[key as keyof formSchemaType]
-                    if (!value) throw new Error("Can't edit game")
-                    changes[key as keyof FavouriteGame] = value
-                }
-            }
-            
-            changes.genres = genres
-            changes.id = editingGame.current.id
-            updateGameMutation.mutate(changes)
+            updateGameMutation.mutate({
+                id: editingGame.current.id,
+                title: data.name,
+                description: data.description,
+                image: data.image,
+                genres: genres,
+                developer: data.developer
+            })
             
             return
         }
@@ -272,7 +279,7 @@ export default function FavouriteGameScreen() {
 
             <div className="mt-4 gap-4 grid grid-cols-2 mx-auto">
                 {getGamesQuery.isLoading && <Loading />}
-                {getGamesQuery.isSuccess && getGamesQuery.data.map(game => (
+                {!getGamesQuery.isLoading && getGamesQuery.isSuccess && getGamesQuery.data.map(game => (
                     <GameInfoCard 
                         key={game.id}
                         game={game}

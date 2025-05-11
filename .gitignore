@@ -30,3 +30,4 @@ dist-ssr
 
 *.http
 *.sln.*
+publish.sh

@@ -191,15 +191,7 @@ export default function FavouriteGameScreen() {
             </Dialog>
             
             <div>
-                {query.isSuccess && query.data.data.map((data: any) => (
-                    <GameInfoCard 
-                        name={data.name}
-                        description={data.description}
-                        imageUrl={data.image}
-                        genres={data.genres}
-                        developer={data.developer}
-                    />
-                ))}
+                <p>{query.isSuccess ? query.data.data.name : ""}</p>
             </div>
         </div>
     )
@@ -207,14 +199,12 @@ export default function FavouriteGameScreen() {
 
 function GameInfoCard(
     props: {
-        name: string
+        title: string
         description: string
         imageUrl: string
         genres: string[]
         developer: string
     }
 ) {
-    return (
-        <p>{props.name}</p>
-    )
+    
 }

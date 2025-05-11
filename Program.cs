@@ -59,6 +59,8 @@ builder.Services.AddScoped<FavoriteGameRepository>();
 builder.Services.AddDbContext<DatabaseContext>(options => options
     .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
+builder.Services.AddCors();
+
 // builder.Services.AddHttpLogging();
 
 var app = builder.Build();
@@ -67,6 +69,8 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     await SeedRolesAsync(services);
 }
+app.UseCors(options =>
+    options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
 
 // app.UseHttpLogging();

@@ -18,7 +18,7 @@ public class FavoriteGameRepository(DatabaseContext databaseContext)
                     Title = x.Title,
                     Description = x.Description,
                     Image = x.Image,
-                    Genres = x.GenreJson,
+                    Genres = JsonSerializer.Deserialize<string[]>(x.GenreJson, JsonSerializerOptions.Web),
                     Developer = x.Developer
                 })
                 .ToArrayAsync();

@@ -17,6 +17,7 @@ import {useMutation, useQuery} from "@tanstack/react-query";
 import axios from "axios";
 import getAuthHeader from "../../repositories/AxiosHeader.ts";
 import {AppContext} from "../../App.tsx";
+import Loading from "../../components/Loading.tsx";
 
 const formSchema = z.object({
     name: z
@@ -34,6 +35,15 @@ const formSchema = z.object({
 
 type formSchemaType = z.infer<typeof formSchema>
 
+interface FavouriteGame {
+    id: number
+    title: string
+    description: string
+    image: string
+    genres: string[]
+    developer: string
+}
+
 export default function FavouriteGameScreen() {
     const context = useContext(AppContext)
     const form = useForm<formSchemaType>({
@@ -50,10 +60,10 @@ export default function FavouriteGameScreen() {
             return await axios.post("/api/favourite", data, getAuthHeader(context.token))
         }
     })
-    const query = useQuery({
-        queryKey: ["games"],
+    const userFavouritesQuery = useQuery<FavouriteGame[]>({
+        queryKey: ["favourite-games"],
         queryFn: async () => {
-            return await axios.get("/api/favourite", getAuthHeader(context.token))
+            return (await axios.get("/api/favourite", getAuthHeader(context.token))).data
         }
     })
 
@@ -88,6 +98,11 @@ export default function FavouriteGameScreen() {
             developer: data.developer,
             image: data.image
         })
+    }
+    
+    function getApiUrl(): string {
+        const payload = JSON.parse(atob(context.token.split(".")[1]))
+        return `${location.protocol}//${location.host}/api/favourite/${payload.nameid}`
     }
 
     return (
@@ -190,21 +205,33 @@ export default function FavouriteGameScreen() {
                 </DialogContent>
             </Dialog>
             
-            <div>
-                <p>{query.isSuccess ? query.data.data.name : ""}</p>
+            <div className="flex flex-col mt-4">
+                <p className="mb-2 font-bold">Your API URL</p>
+                <p>{getApiUrl()}</p>
+            </div>
+
+            <div className="mt-4 gap-4 grid grid-cols-2 mx-auto">
+                {userFavouritesQuery.isLoading && <Loading />}
+                {userFavouritesQuery.isSuccess && userFavouritesQuery.data.map(game => (
+                    <GameInfoCard key={game.id} game={game} />
+                ))}
             </div>
         </div>
     )
 }
 
-function GameInfoCard(
-    props: {
-        title: string
-        description: string
-        imageUrl: string
-        genres: string[]
-        developer: string
-    }
-) {
+function GameInfoCard(props: { game: FavouriteGame }) {
+    const game = props.game
     
+    return (
+        <div className="flex flex-col gap-1 p-3 bg-gray-300 w-[300px] rounded-md shadow-md">
+            <div className="w-full rounded-md h-64 overflow-hidden shadow-md">
+                <img src={game.image} alt="" className="w-full h-full object-cover" />
+            </div>
+            <p className="font-bold text-xl">{game.title}</p>
+            <p className="text-sm mb-4">{game.description}</p>
+            <p>Genres: {game.genres.join(", ")}</p>
+            <p>Developer: {game.developer}</p>
+        </div>
+    )
 }

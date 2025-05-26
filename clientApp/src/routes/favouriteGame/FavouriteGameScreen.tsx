@@ -11,7 +11,7 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "..
 import {Input} from "../../components/ui/input.tsx";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {useContext, useEffect, useRef, useState} from "react";
+import {useContext, useRef, useState, KeyboardEvent} from "react";
 import {z} from "zod";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import axios from "axios";
@@ -35,7 +35,13 @@ const formSchema = z.object({
         .string()
         .min(1),
     image: z.string(),
-    genres: z.string(),
+    genres: z
+        .string()
+        .min(1)
+        .max(20, "Each genre can have at most 20 characters")
+        .array()
+        .min(1, "Must have at least one genre")
+        .max(20, "Can have at most 20 genres"),
     developer: z
         .string()
         .min(1)
@@ -55,16 +61,16 @@ interface FavouriteGame {
 export default function FavouriteGameScreen() {
     const client = useQueryClient()
     const context = useContext(AppContext)
+    
     const form = useForm<formSchemaType>({
         resolver: zodResolver(formSchema),
-        defaultValues: { name: "", genres: "", image: "", description: "", developer: "" }
+        defaultValues: { name: "", genres: [], image: "", description: "", developer: "" }
     })
 
-    const [genres, setGenres] = useState<string[]>([])
+    const [genreText, setGenreText] = useState("")
     const [isAddDialogVisible, setIsAddDialogVisible] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
     const editingGame = useRef<FavouriteGame>()
-    const genreText = form.watch("genres")
     
     const createGameMutation = useMutation({
         mutationFn: async (data: object) => {
@@ -112,26 +118,22 @@ export default function FavouriteGameScreen() {
         onSettled: () => client.invalidateQueries({ queryKey: [favouriteGamesKey] })
     })
 
-    useEffect(() => {
-        if (genreText.length <= 1) return
-        let text = genreText.trimStart()
+    function onGenreInputKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault()
+            if (genreText.length <= 1) return
+            let text = genreText.trim()
 
-        if (text[text.length - 1] == " ") {
-            const updatedGenres = [...genres]
-
-            text = text.substring(0, text.length - 1)
-            if (!genres.includes(text)) {
-                updatedGenres.push(text)
-                setGenres(updatedGenres)
+            const currentGenres = form.getValues("genres")
+            if (!currentGenres.includes(text)) {
+                form.setValue("genres", [...currentGenres, text])
             }
-            form.setValue("genres", "")
+            setGenreText("")
         }
-    }, [genreText]);
+    }
 
     function onGenreRemove(genre: string) {
-        const updatedGenres = [...genres]
-        updatedGenres.splice(updatedGenres.indexOf(genre), 1)
-        setGenres(updatedGenres)
+        form.setValue("genres", form.getValues("genres").filter(x => x !== genre))
     }
 
     function onSubmit(data: formSchemaType) {
@@ -145,7 +147,7 @@ export default function FavouriteGameScreen() {
                 title: data.name,
                 description: data.description,
                 image: data.image,
-                genres: genres,
+                genres: data.genres,
                 developer: data.developer
             })
             
@@ -155,7 +157,7 @@ export default function FavouriteGameScreen() {
         createGameMutation.mutate({
             title: data.name,
             description: data.description,
-            genres: genres,
+            genres: data.genres,
             developer: data.developer,
             image: data.image
         })
@@ -164,10 +166,9 @@ export default function FavouriteGameScreen() {
     function onGameEditClick(game: FavouriteGame) {
         form.setValue("name", game.title)
         form.setValue("description", game.description)
-        form.setValue("genres", "")
         form.setValue("developer", game.developer)
         form.setValue("image", game.image)
-        setGenres(game.genres)
+        form.setValue("genres", game.genres)
         setIsEditing(true)
         editingGame.current = game
         setIsAddDialogVisible(true)
@@ -175,7 +176,6 @@ export default function FavouriteGameScreen() {
     
     function onGameCreateClick() {
         setIsEditing(false)
-        setGenres([])
         form.reset()
     }
     
@@ -246,14 +246,17 @@ export default function FavouriteGameScreen() {
                             <FormField
                                 control={form.control}
                                 name="genres"
-                                render={({ field }) => (
+                                render={() => (
                                     <FormItem>
                                         <FormLabel>Genres</FormLabel>
                                         <FormControl>
-                                            <Input autoComplete="off" {...field} />
+                                            <Input autoComplete="off"
+                                            value={genreText}
+                                            onChange={(e) => setGenreText(e.target.value)}
+                                            onKeyDown={onGenreInputKeyDown}/>
                                         </FormControl>
                                         <div className="flex flex-wrap gap-2">
-                                            {genres.map(genre => (
+                                            {form.watch("genres").map(genre => (
                                                 <div key={genre} className="size-max px-2 py-1 bg-gray-400 rounded-md">
                                                     {genre}
 

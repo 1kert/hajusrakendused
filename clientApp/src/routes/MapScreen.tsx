@@ -22,7 +22,7 @@ interface MarkerDialogData {
 
 export default function MapScreen() {
     const appContext = useContext(AppContext)
-    if (appContext.token == null) return <LoginScreen/>
+    if (appContext.token == "") return <LoginScreen/>
 
     const [radarMap, setRadarMap] = useState<RadarMap | null>(null)
     const [allMarkers, setAllMarkers] = useState<Marker[]>([])

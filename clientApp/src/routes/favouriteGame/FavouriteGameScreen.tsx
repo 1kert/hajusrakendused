@@ -26,7 +26,7 @@ import {
     DropdownMenuTrigger
 } from "../../components/ui/dropdown-menu.tsx";
 
-const favouriteGamesKey = "favourite-games"
+const favouriteGamesKey = ["favourite-games"]
 const formSchema = z.object({
     name: z
         .string()
@@ -59,8 +59,8 @@ interface FavouriteGame {
 }
 
 export default function FavouriteGameScreen() {
-    const client = useQueryClient()
     const context = useContext(AppContext)
+    const { queryGames, updateGame, removeGame, createGame } = useFavouriteGameQueries()
     
     const form = useForm<formSchemaType>({
         resolver: zodResolver(formSchema),
@@ -72,51 +72,6 @@ export default function FavouriteGameScreen() {
     const [isEditing, setIsEditing] = useState(false)
     const editingGame = useRef<FavouriteGame>()
     
-    const createGameMutation = useMutation({
-        mutationFn: async (data: object) => {
-            return await axios.post("/api/favourite", data, getAuthHeader(context.token))
-        },
-        onSettled: () => client.invalidateQueries({queryKey: [favouriteGamesKey]}),
-    })
-    const getGamesQuery = useQuery<FavouriteGame[]>({
-        queryKey: [favouriteGamesKey],
-        queryFn: async () => {
-            return (await axios.get("/api/favourite", getAuthHeader(context.token))).data
-        }
-    })
-    const updateGameMutation = useMutation({
-        mutationFn: async (data: Partial<FavouriteGame>) => {
-            return await axios.put("/api/favourite", data, getAuthHeader(context.token))
-        },
-        onMutate: async (newGame: Partial<FavouriteGame>) => {
-            await client.cancelQueries({ queryKey: [favouriteGamesKey] })
-            const previousGames: FavouriteGame[] | undefined = client.getQueryData([favouriteGamesKey])
-            client.setQueryData([favouriteGamesKey], previousGames?.map(game => {
-                if (game.id !== newGame.id) return game
-                return { ...game, ...newGame }
-            }))
-            return { previousGames }
-        },
-        onError: async (_, __, context) => {
-            client.setQueryData([favouriteGamesKey], context?.previousGames)
-        },
-        onSettled: () => client.invalidateQueries({ queryKey: [favouriteGamesKey] })
-    })
-    const deleteGameMutation = useMutation({
-        mutationFn: async (id: number) => {
-            return await axios.delete(`/api/favourite/${id}`, getAuthHeader(context.token))
-        },
-        onMutate: async (id: number) => {
-            await client.cancelQueries({queryKey: [favouriteGamesKey]})
-            const previousGames: FavouriteGame[] | undefined = client.getQueryData([favouriteGamesKey])
-            client.setQueryData([favouriteGamesKey], previousGames?.filter(game => game.id !== id))
-            return { previousGames }
-        },
-        onError: async (_, __, context) => {
-            client.setQueryData([favouriteGamesKey], context?.previousGames)
-        },
-        onSettled: () => client.invalidateQueries({ queryKey: [favouriteGamesKey] })
-    })
 
     function onGenreInputKeyDown(e: KeyboardEvent<HTMLInputElement>) {
         if (e.key === "Enter" || e.key === " ") {
@@ -142,7 +97,7 @@ export default function FavouriteGameScreen() {
         if (isEditing) {
             if (!editingGame.current) throw new Error("Can't edit game")
             
-            updateGameMutation.mutate({
+            updateGame.mutate({
                 id: editingGame.current.id,
                 title: data.name,
                 description: data.description,
@@ -154,7 +109,7 @@ export default function FavouriteGameScreen() {
             return
         }
         
-        createGameMutation.mutate({
+        createGame.mutate({
             title: data.name,
             description: data.description,
             genres: data.genres,
@@ -180,7 +135,7 @@ export default function FavouriteGameScreen() {
     }
     
     function onGameDelete(game: FavouriteGame) {
-        deleteGameMutation.mutate(game.id)
+        removeGame.mutate(game.id)
     }
     
     function getApiUrl(): string {
@@ -251,9 +206,10 @@ export default function FavouriteGameScreen() {
                                         <FormLabel>Genres</FormLabel>
                                         <FormControl>
                                             <Input autoComplete="off"
-                                            value={genreText}
-                                            onChange={(e) => setGenreText(e.target.value)}
-                                            onKeyDown={onGenreInputKeyDown}/>
+                                                   placeholder="Enter a genre by pressing enter or space"
+                                                   value={genreText}
+                                                   onChange={(e) => setGenreText(e.target.value)}
+                                                   onKeyDown={onGenreInputKeyDown}/>
                                         </FormControl>
                                         <div className="flex flex-wrap gap-2">
                                             {form.watch("genres").map(genre => (
@@ -297,8 +253,8 @@ export default function FavouriteGameScreen() {
             </div>
 
             <div className="mt-4 gap-4 grid grid-cols-2 mx-auto">
-                {getGamesQuery.isLoading && <Loading />}
-                {!getGamesQuery.isLoading && getGamesQuery.isSuccess && getGamesQuery.data.map(game => (
+                {queryGames.isLoading && <Loading />}
+                {!queryGames.isLoading && queryGames.isSuccess && queryGames.data.map(game => (
                     <GameInfoCard 
                         key={game.id}
                         game={game}
@@ -348,4 +304,60 @@ function GameInfoCard(
             <p>Developer: {game.developer}</p>
         </div>
     )
+}
+
+function useFavouriteGameQueries() {
+    const client = useQueryClient()
+    const context = useContext(AppContext)
+    
+    const createGame = useMutation({
+        mutationFn: async (data: object) => {
+            return await axios.post("/api/favourite", data, getAuthHeader(context.token))
+        },
+        onSettled: () => client.invalidateQueries({queryKey: favouriteGamesKey}),
+    })
+    
+    const queryGames = useQuery<FavouriteGame[]>({
+        queryKey: favouriteGamesKey,
+        queryFn: async () => {
+            return (await axios.get("/api/favourite", getAuthHeader(context.token))).data
+        }
+    })
+    
+    const updateGame = useMutation({
+        mutationFn: async (data: Partial<FavouriteGame>) => {
+            return await axios.put("/api/favourite", data, getAuthHeader(context.token))
+        },
+        onMutate: async (newGame: Partial<FavouriteGame>) => {
+            await client.cancelQueries({ queryKey: favouriteGamesKey })
+            const previousGames: FavouriteGame[] | undefined = client.getQueryData(favouriteGamesKey)
+            client.setQueryData(favouriteGamesKey, previousGames?.map(game => {
+                if (game.id !== newGame.id) return game
+                return { ...game, ...newGame }
+            }))
+            return { previousGames }
+        },
+        onError: async (_, __, context) => {
+            client.setQueryData(favouriteGamesKey, context?.previousGames)
+        },
+        onSettled: () => client.invalidateQueries({ queryKey: favouriteGamesKey })
+    })
+    
+    const removeGame = useMutation({
+        mutationFn: async (id: number) => {
+            return await axios.delete(`/api/favourite/${id}`, getAuthHeader(context.token))
+        },
+        onMutate: async (id: number) => {
+            await client.cancelQueries({queryKey: favouriteGamesKey})
+            const previousGames: FavouriteGame[] | undefined = client.getQueryData(favouriteGamesKey)
+            client.setQueryData(favouriteGamesKey, previousGames?.filter(game => game.id !== id))
+            return { previousGames }
+        },
+        onError: async (_, __, context) => {
+            client.setQueryData(favouriteGamesKey, context?.previousGames)
+        },
+        onSettled: () => client.invalidateQueries({ queryKey: favouriteGamesKey })
+    })
+
+    return { queryGames, updateGame, removeGame, createGame }
 }

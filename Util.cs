@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using FluentValidation.Results;
 using hajusrakendused.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,6 +22,9 @@ public static class Extensions
             ErrorType.ServerError => new ObjectResult("") { StatusCode = 500},
             _ => new ObjectResult("") { StatusCode = 500}
         };
+
+    public static ObjectResult GetResult(this ValidationResult validationResult)
+        => new BadRequestObjectResult(validationResult.ToDictionary());
 }
 
 public class Result<T>

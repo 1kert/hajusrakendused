@@ -12,7 +12,7 @@ public class FavoriteGameEntity
     public required string Description { get; set; }
     [MaxLength(256)]
     public required string Image { get; set; }
-    [MaxLength(128)]
+    [MaxLength(512)]
     public required string GenreJson { get; set; }
     [MaxLength(64)]
     public required string Developer { get; set; }

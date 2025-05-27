@@ -8,7 +8,10 @@ namespace hajusrakendused.Controllers;
 
 [ApiController]
 [Route("/api/favourite")]
-public class FavoriteGameController(FavoriteGameRepository favoriteGameRepository): ControllerBase
+public class FavoriteGameController(
+    FavoriteGameRepository favoriteGameRepository,
+    FavouriteGameCreateValidator createValidator,
+    FavouriteGameUpdateValidator updateValidator): ControllerBase
 {
     [HttpGet("{userId}")]
     public async Task<IActionResult> GetAllFavouriteGames(string userId)
@@ -43,6 +46,9 @@ public class FavoriteGameController(FavoriteGameRepository favoriteGameRepositor
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> UpdateFavouriteGame([FromBody] FavouriteGameUpdateRequest request)
     {
+        var validateResult = await updateValidator.ValidateAsync(request);
+        if (!validateResult.IsValid) return validateResult.GetResult();
+        
         var userId = User.GetUserId();
         if (userId == null) return Unauthorized();
 
@@ -63,6 +69,9 @@ public class FavoriteGameController(FavoriteGameRepository favoriteGameRepositor
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> CreateFavouriteGame([FromBody] FavouriteGameRequest request)
     {
+        var validateResult = await createValidator.ValidateAsync(request);
+        if (!validateResult.IsValid) validateResult.GetResult();
+        
         var userId = User.GetUserId();
         if (userId == null) return Unauthorized();
 

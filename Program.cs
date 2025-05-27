@@ -1,5 +1,6 @@
 using System.Text;
 using hajusrakendused.Models;
+using hajusrakendused.Models.Http;
 using hajusrakendused.Models.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -60,6 +61,9 @@ builder.Services.AddDbContext<DatabaseContext>(options => options
     .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 builder.Services.AddCors();
+
+builder.Services.AddScoped<FavouriteGameCreateValidator>();
+builder.Services.AddScoped<FavouriteGameUpdateValidator>();
 
 // builder.Services.AddHttpLogging();
 

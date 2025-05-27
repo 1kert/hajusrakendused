@@ -30,21 +30,27 @@ const favouriteGamesKey = ["favourite-games"]
 const formSchema = z.object({
     name: z
         .string()
-        .min(1),
+        .nonempty("Title must not be empty")
+        .max(64),
     description: z
         .string()
-        .min(1),
-    image: z.string(),
+        .nonempty("Description must not be empty")
+        .max(128),
+    image: z
+        .string()
+        .nonempty("Image must not be empty")
+        .max(256),
     genres: z
         .string()
-        .min(1)
+        .nonempty()
         .max(20, "Each genre can have at most 20 characters")
         .array()
         .min(1, "Must have at least one genre")
         .max(20, "Can have at most 20 genres"),
     developer: z
         .string()
-        .min(1)
+        .nonempty("Developer must not be empty")
+        .max(64)
 })
 
 type formSchemaType = z.infer<typeof formSchema>

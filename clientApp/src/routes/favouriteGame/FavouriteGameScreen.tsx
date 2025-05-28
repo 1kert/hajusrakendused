@@ -64,9 +64,18 @@ interface FavouriteGame {
     developer: string
 }
 
+interface Movie {
+    id: number
+    title: string
+    image: string
+    description: string
+    director: string
+    release_year: number
+}
+
 export default function FavouriteGameScreen() {
     const context = useContext(AppContext)
-    const { queryGames, updateGame, removeGame, createGame } = useFavouriteGameQueries()
+    const { queryGames, updateGame, removeGame, createGame, queryOtherApi } = useFavouriteGameQueries()
     
     const form = useForm<formSchemaType>({
         resolver: zodResolver(formSchema),
@@ -269,6 +278,34 @@ export default function FavouriteGameScreen() {
                     />
                 ))}
             </div>
+            
+            <p className="font-bold text-2xl mt-8">Other API</p>
+            <div className="mt-4 gap-4 grid grid-cols-2 mx-auto">
+                {queryOtherApi.isLoading && <Loading />}
+                {queryOtherApi.isSuccess && queryOtherApi.data.map(movie => (
+                    <MovieInfoCard movie={movie} />
+                ))}
+            </div>
+        </div>
+    )
+}
+
+function MovieInfoCard(
+    props: {
+        movie: Movie
+    }
+) {
+    const movie = props.movie
+    
+    return (
+        <div className="flex flex-col gap-1 p-3 bg-gray-300 w-[300px] rounded-md shadow-md">
+            <div className="w-full rounded-md h-64 overflow-hidden shadow-md">
+                <img src={movie.image} alt="" className="w-full h-full object-cover" />
+            </div>
+            <p className="font-bold text-xl">{movie.title}</p>
+            <p className="text-sm mb-4">{movie.description}</p>
+            <p>{movie.director}</p>
+            <p>{movie.release_year}</p>
         </div>
     )
 }
@@ -364,6 +401,13 @@ function useFavouriteGameQueries() {
         },
         onSettled: () => client.invalidateQueries({ queryKey: favouriteGamesKey })
     })
+    
+    const queryOtherApi = useQuery<Movie[]>({
+        queryKey: ["other-api"],
+        queryFn: async () => {
+            return (await axios.get("https://hajus.ta23raamat.itmajakas.ee/api/movies")).data
+        }
+    })
 
-    return { queryGames, updateGame, removeGame, createGame }
+    return { queryGames, updateGame, removeGame, createGame, queryOtherApi }
 }

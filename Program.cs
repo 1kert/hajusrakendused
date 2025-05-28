@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Stripe;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,7 @@ builder.Services.AddControllersWithViews();
 
 string? jwtKey = builder.Configuration["JwtKey"];
 string? connectionString = builder.Configuration["ConnectionStrings:Default"];
+string? stripeKey = builder.Configuration["Stripe:SecretKey"];
 if(jwtKey == null)
 {
     Console.WriteLine("no jwt key found");
@@ -25,6 +27,13 @@ if(connectionString == null)
     Console.WriteLine("connection string not found");
     return;
 }
+
+if (stripeKey == null)
+{
+    Console.WriteLine("no stripe key found");
+    return;
+}
+StripeConfiguration.ApiKey = stripeKey;
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {

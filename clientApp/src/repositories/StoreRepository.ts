@@ -1,13 +1,7 @@
 import axios from "axios";
 import getAuthHeader from "./AxiosHeader.ts";
 
-export interface StoreItem {
-    id: number
-    image: string
-    name: string
-    description: string
-    price: number
-}
+interface StoreItem {}
 
 export interface CartItem {
     id: number
@@ -18,12 +12,6 @@ export interface CartItem {
 }
 
 export default class StoreRepository {
-    static async getStoreItems(): Promise<StoreItem[]> {
-        const response = await axios.get("/api/store")
-        // todo: error
-        return response.data
-    }
-    
     static async getStoreItemById(id: number): Promise<StoreItem | undefined> {
         const response = await axios.get(`/api/store/${id}`)
         // todo: error

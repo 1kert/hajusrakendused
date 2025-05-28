@@ -1,33 +1,29 @@
-import {useContext, useEffect, useState} from "react"
-import StoreRepository, {StoreItem} from "../../repositories/StoreRepository.ts"
 import {useNavigate} from "react-router-dom"
 import {Button} from "../../components/ui/button.tsx"
 import ic_cart from "../../assets/ic_shopping_cart.svg"
+import {useQuery} from "@tanstack/react-query";
 import axios from "axios";
-import getAuthHeader from "../../repositories/AxiosHeader.ts";
-import {AppContext} from "../../App.tsx";
+import Loading from "../../components/Loading.tsx";
+
+interface StoreItem {
+    id: number
+    image: string
+    name: string
+    description: string
+    price: number
+}
 
 export default function StoreScreen() {
     const navigate  = useNavigate();
-    const context = useContext(AppContext);
-    const [storeItems, setStoreItems] = useState<StoreItem[]>([])
-    
-    useEffect(() => {
-        (async () => {
-            const items = await StoreRepository.getStoreItems()
-            setStoreItems(items)
-        })()
-    }, [])
+    const storeItemsQuery = useQuery<StoreItem[]>({
+        queryKey: ["store-items"],
+        queryFn: async () => {
+            return (await axios.get("/api/store")).data
+        }
+    })
     
     function onStoreItemClick(id: number) {
         navigate(`/store/${id}`)
-    }
-    
-    async function onPaymentClick() {
-        const result = await axios.get("api/store/payment-session", getAuthHeader(context.token))
-        if (result.status !== 200) return
-        
-        window.location.href = result.data
     }
     
     return (
@@ -35,9 +31,9 @@ export default function StoreScreen() {
             <Button onClick={() => navigate("/store/cart")} className="w-max ml-auto">
                 <img src={ic_cart} alt="cart"/>
             </Button>
-            <Button onClick={onPaymentClick}>payment</Button>
             <div className="flex flex-wrap gap-3 w-full mx-auto mt-4">
-                {storeItems.map(item => (
+                {storeItemsQuery.isLoading && <Loading className="mx-auto"/>}
+                {storeItemsQuery.isSuccess && storeItemsQuery.data.map(item => (
                     <StoreItemCard 
                         name={item.name}
                         image={item.image}

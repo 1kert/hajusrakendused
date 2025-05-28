@@ -77,7 +77,7 @@ public class StoreController(StoreRepository storeRepository) : ControllerBase
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> GetPaymentIntent()
     {
-        var domain = "http://localhost:5173/payment";
+        const string domain = "http://localhost:5173/payment";
         var options = new SessionCreateOptions
         {
             LineItems = new List<SessionLineItemOptions>

@@ -1,9 +1,9 @@
-using System.Security.Claims;
 using hajusrakendused.Models.Http;
 using hajusrakendused.Models.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Stripe.Checkout;
 
 namespace hajusrakendused.Controllers;
 
@@ -71,5 +71,38 @@ public class StoreController(StoreRepository storeRepository) : ControllerBase
         
         var result = await storeRepository.GetCartItemsResponseAsync(userId);
         return result == null ? NotFound() : Ok(result);
+    }
+
+    [HttpGet("payment-session")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> GetPaymentIntent()
+    {
+        var domain = "http://localhost:5173/payment";
+        var options = new SessionCreateOptions
+        {
+            LineItems = new List<SessionLineItemOptions>
+            {
+                new SessionLineItemOptions
+                {
+                    PriceData = new SessionLineItemPriceDataOptions
+                    {
+                        Currency = "usd",
+                        ProductData = new SessionLineItemPriceDataProductDataOptions
+                        {
+                            Name = "Product"
+                        },
+                        UnitAmount = 10000
+                    },
+                    Quantity = 1,
+                },
+            },
+            Mode = "payment",
+            SuccessUrl = domain + "?success=true",
+            CancelUrl = domain + "?canceled=true",
+        };
+        var service = new SessionService();
+        Session session = await service.CreateAsync(options);
+
+        return Ok(session.Url);
     }
 }

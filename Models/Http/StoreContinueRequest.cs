@@ -32,7 +32,7 @@ public partial class StoreContinueRequestValidator : AbstractValidator<StoreCont
             .WithMessage("Email cannot be empty")
             .MaximumLength(50)
             .WithMessage("Email cannot exceed 50 characters")
-            .Must(x => EmailRegex().IsMatch(x))
+            .Must(x => x != null && EmailRegex().IsMatch(x))
             .WithMessage("Not a valid email address format");
         
         RuleFor(x => x.PhoneNumber)
@@ -40,7 +40,7 @@ public partial class StoreContinueRequestValidator : AbstractValidator<StoreCont
             .WithMessage("Phone number cannot be empty")
             .MaximumLength(15)
             .WithMessage("Phone number cannot exceed 15 characters")
-            .Must(x => PhoneNumberRegex().IsMatch(x))
+            .Must(x => x != null && PhoneNumberRegex().IsMatch(x))
             .WithMessage("Not a valid email address format");
     }
 

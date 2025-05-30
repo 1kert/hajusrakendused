@@ -1,3 +1,4 @@
+using hajusrakendused.Models;
 using hajusrakendused.Models.Http;
 using hajusrakendused.Models.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -56,6 +57,17 @@ public class StoreController(
         return result ? Ok() : StatusCode(500);
     }
     
+    [HttpDelete("clear-cart")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> ClearCart()
+    {
+        var userId = User.GetUserId();
+        if (userId == null) return Unauthorized();
+
+        var result = await storeRepository.ClearCartAsync(userId);
+        return result ? Ok() : StatusCode(500);
+    }
+    
     [HttpPut]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> UpdateCartItem([FromBody] CartRequest request)
@@ -92,7 +104,7 @@ public class StoreController(
         var cart = await storeRepository.GetCartItemsResponseAsync(userId);
         if (cart == null) return StatusCode(StatusCodes.Status500InternalServerError);
         
-        const string domain = "http://localhost:5173/payment";
+        string domain = $"{Config.Domain}/store";
         var options = new SessionCreateOptions
         {
             LineItems = cart.Select(cartItem => new SessionLineItemOptions
@@ -110,7 +122,7 @@ public class StoreController(
             }).ToList(),
             Mode = "payment",
             SuccessUrl = domain + "?success=true",
-            CancelUrl = domain + "?canceled=true",
+            CancelUrl = domain
         };
         var service = new SessionService();
         Session session = await service.CreateAsync(options);

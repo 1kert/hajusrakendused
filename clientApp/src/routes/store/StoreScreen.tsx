@@ -1,9 +1,12 @@
-import {useNavigate} from "react-router-dom"
+import {useNavigate, useSearchParams} from "react-router-dom"
 import {Button} from "../../components/ui/button.tsx"
 import ic_cart from "../../assets/ic_shopping_cart.svg"
-import {useQuery} from "@tanstack/react-query";
+import {useMutation, useQuery} from "@tanstack/react-query";
 import axios from "axios";
 import Loading from "../../components/Loading.tsx";
+import {useContext, useEffect} from "react";
+import getAuthHeader from "../../repositories/AxiosHeader.ts";
+import {AppContext} from "../../App.tsx";
 
 export interface StoreItem {
     id: number
@@ -15,7 +18,28 @@ export interface StoreItem {
 
 export default function StoreScreen() {
     const navigate  = useNavigate();
+    const [searchParams] = useSearchParams();
+    const context = useContext(AppContext)
     const { storeItemsQuery } = useStoreItemsQueries()
+    
+    const clearCartMutation = useMutation({
+        mutationFn: async () => {
+            return (await axios.delete("/api/store/clear-cart", getAuthHeader(context.token))).data
+        }
+    })
+
+    useEffect(() => {
+        const success = searchParams.get("success")
+        if (!success) return
+        if (success !== "true") return
+        
+        clearCartMutation.mutate(undefined, {
+            onSuccess: () => {
+                location.href = "/store";
+            }
+        })
+        
+    }, []);
     
     function onStoreItemClick(id: number) {
         navigate(`/store/${id}`)

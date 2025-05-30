@@ -22,6 +22,7 @@ export default function StoreItemDetailScreen() {
     const { cartItemCreateMutation } = useCartQueries()
     
     async function onAddToCartClick() {
+        if (cartItemCreateMutation.isPending) return
         const storeItem = storeItemQuery.data
         if (!storeItem) throw Error("store item not found")
         const quantityNumber = Number(quantity)
@@ -51,7 +52,9 @@ export default function StoreItemDetailScreen() {
                         <div className="flex gap-2 mt-4">
                             <Input type="number" className="w-16 text-center" value={quantity} onChange={e => setQuantity(e.target.value)}/>
                             <Button onClick={onAddToCartClick}>
-                                <img className="size-full" src={ic_cart} alt="cart"/>
+                                {cartItemCreateMutation.isPending 
+                                    ? <Loading/>
+                                    : <img className="size-full" src={ic_cart} alt="cart"/>}
                             </Button>
                         </div>
                     </div>

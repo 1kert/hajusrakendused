@@ -51,6 +51,7 @@ export default function StoreContinueFormScreen() {
     })
     
     function onSubmit(data: FormSchemaType) {
+        if (continueMutation.isPending) return
         continueMutation.mutate(data, {
             onSuccess: (response: string) => {
                 location.href = response

@@ -17,6 +17,7 @@ builder.Services.AddControllersWithViews();
 string? jwtKey = builder.Configuration["JwtKey"];
 string? connectionString = builder.Configuration["ConnectionStrings:Default"];
 string? stripeKey = builder.Configuration["Stripe:SecretKey"];
+string? domain = builder.Configuration["Domain"];
 if(jwtKey == null)
 {
     Console.WriteLine("no jwt key found");
@@ -27,13 +28,21 @@ if(connectionString == null)
     Console.WriteLine("connection string not found");
     return;
 }
-
 if (stripeKey == null)
 {
     Console.WriteLine("no stripe key found");
     return;
 }
+
+if (domain == null)
+{
+    Console.WriteLine("no domain found");
+    return;
+}
 StripeConfiguration.ApiKey = stripeKey;
+Config.Domain = domain;
+Config.DatabaseConnectionString = connectionString;
+Config.JwtSecretKey = jwtKey;
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {

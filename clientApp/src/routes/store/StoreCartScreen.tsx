@@ -1,4 +1,4 @@
-import {useContext} from "react";
+import {useContext, useEffect, useState} from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table.tsx";
 import {AppContext} from "../../App.tsx";
 import { Button } from "../../components/ui/button.tsx";
@@ -27,6 +27,7 @@ export interface CartItemUpdate {
 export default function StoreCartScreen() {
     const { cartItemUpdateMutation, cartItemRemoveMutation, cartItemsQuery } = useCartQueries()
     const navigate = useNavigate()
+    const [totalPrice, setTotalPrice] = useState(0)
     
     async function onRemoveItem(id: number) {
         cartItemRemoveMutation.mutate(id)
@@ -48,6 +49,17 @@ export default function StoreCartScreen() {
     function onContinueClick() {
         navigate("/store/continue")
     }
+    
+    function round(num: number) {
+        return Math.round(num * 100) / 100
+    }
+
+    useEffect(() => {
+        const items = cartItemsQuery.data
+        if (!items) return
+
+        setTotalPrice(round(items.reduce((acc, item) => acc + item.quantity * item.price, 0)))
+    }, [cartItemsQuery.data]);
     
     return (
         <div className="w-[1000px] flex flex-col mx-auto py-8">
@@ -75,8 +87,8 @@ export default function StoreCartScreen() {
                                     <TableCell className="font-medium"><img className="w-20 h-14" src={item.image} alt=""/></TableCell>
                                     <TableCell>{item.name}</TableCell>
                                     <TableCell className="flex flex-col">
-                                        <p className="text-md font-bold">${item.price * item.quantity}</p>
-                                        <p className="text-gray-600">${item.price} each</p>
+                                        <p className="text-md font-bold">${round(item.price * item.quantity)}</p>
+                                        <p className="text-gray-600">${round(item.price)} each</p>
                                     </TableCell>
                                     <TableCell>
                                         <Input className="w-16 text-center ml-auto" value={item.quantity} onChange={e => onQuantityChange(item, e.target.value)} />
@@ -86,6 +98,7 @@ export default function StoreCartScreen() {
                             ))}
                         </TableBody>
                     </Table>
+                    <p className="text-2xl mt-2">Total: <span className="font-bold">${totalPrice}</span></p>
                     <Button className="w-52 ml-auto mt-8" onClick={onContinueClick}>Continue</Button>
                 </>
             )}

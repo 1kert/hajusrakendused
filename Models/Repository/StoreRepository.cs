@@ -146,4 +146,19 @@ public class StoreRepository(DatabaseContext dbContext)
             return false;
         }
     }
+
+    public async Task<bool> ClearCartAsync(string userId)
+    {
+        try
+        {
+            dbContext.Carts.RemoveRange(dbContext.Carts.Where(x => x.UserId == userId));
+            await dbContext.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
+        }
+    }
 }

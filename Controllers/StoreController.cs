@@ -11,7 +11,8 @@ namespace hajusrakendused.Controllers;
 [Route("/api/store")]
 public class StoreController(
     StoreRepository storeRepository,
-    StoreContinueRequestValidator continueRequestValidator) : ControllerBase
+    StoreContinueRequestValidator continueRequestValidator,
+    CartRequestValidator cartRequestValidator) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetStoreItems()
@@ -33,6 +34,9 @@ public class StoreController(
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> AddToCart([FromBody] CartRequest request)
     {
+        var validationResult = await cartRequestValidator.ValidateAsync(request);
+        if (!validationResult.IsValid) return validationResult.GetResult();
+        
         var userId = User.GetUserId();
         if (userId == null) return Unauthorized();
         

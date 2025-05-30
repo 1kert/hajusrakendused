@@ -74,6 +74,7 @@ builder.Services.AddCors();
 builder.Services.AddScoped<FavouriteGameCreateValidator>();
 builder.Services.AddScoped<FavouriteGameUpdateValidator>();
 builder.Services.AddScoped<StoreContinueRequestValidator>();
+builder.Services.AddScoped<CartRequestValidator>();
 
 // builder.Services.AddHttpLogging();
 

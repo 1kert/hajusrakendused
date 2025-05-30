@@ -5,7 +5,7 @@ import {useQuery} from "@tanstack/react-query";
 import axios from "axios";
 import Loading from "../../components/Loading.tsx";
 
-interface StoreItem {
+export interface StoreItem {
     id: number
     image: string
     name: string
@@ -15,12 +15,7 @@ interface StoreItem {
 
 export default function StoreScreen() {
     const navigate  = useNavigate();
-    const storeItemsQuery = useQuery<StoreItem[]>({
-        queryKey: ["store-items"],
-        queryFn: async () => {
-            return (await axios.get("/api/store")).data
-        }
-    })
+    const { storeItemsQuery } = useStoreItemsQueries()
     
     function onStoreItemClick(id: number) {
         navigate(`/store/${id}`)
@@ -61,4 +56,15 @@ function StoreItemCard(
             <p className="text-lg font-bold">${props.price}</p>
         </div>
     )
+}
+
+function useStoreItemsQueries() {
+    const storeItemsQuery = useQuery<StoreItem[]>({
+        queryKey: ["store-items"],
+        queryFn: async () => {
+            return (await axios.get("/api/store")).data
+        }
+    })
+    
+    return { storeItemsQuery }
 }

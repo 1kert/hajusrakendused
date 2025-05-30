@@ -1,34 +1,33 @@
-import {useContext, useEffect, useRef, useState} from "react";
-import StoreRepository, {CartItem} from "../../repositories/StoreRepository.ts";
+import {useContext} from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table.tsx";
 import {AppContext} from "../../App.tsx";
 import { Button } from "../../components/ui/button.tsx";
 import { Input } from "../../components/ui/input.tsx";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import axios from "axios";
+import getAuthHeader from "../../repositories/AxiosHeader.ts";
+import Loading from "../../components/Loading.tsx";
+
+export const cartItemsKey = ["cartItems"]
+
+interface CartItem {
+    id: number
+    image: string
+    name: string
+    price: number
+    quantity: number
+}
+
+export interface CartItemUpdate {
+    id: number
+    quantity: number
+}
 
 export default function StoreCartScreen() {
-    const context = useContext(AppContext)
-    const [cartItems, setCartItems] = useState<CartItem[]>([]);
-    const quantityTimeouts = useRef<Record<number, NodeJS.Timeout>>({})
-    
-    useEffect(() => {
-        (async () => {
-            await refreshCart()
-        })()
-    }, [])
-    
-    useEffect(() => {
-        console.log(cartItems)
-    }, [cartItems])
-    
-    async function refreshCart() {
-        const items = await StoreRepository.getCart(context.token)
-        setCartItems(items)
-    }
+    const { cartItemUpdateMutation, cartItemRemoveMutation, cartItemsQuery } = useCartQueries()
     
     async function onRemoveItem(id: number) {
-        const result = await StoreRepository.removeFromCart(id, context.token)
-        if (!result) return
-        await refreshCart()
+        cartItemRemoveMutation.mutate(id)
     }
     
     function onQuantityChange(
@@ -37,26 +36,22 @@ export default function StoreCartScreen() {
     ) {
         const num = Number(quantity)
         if(Number.isNaN(num)) return
-        
-        item.quantity = num
-        setCartItems([...cartItems])
-        
-        if (quantityTimeouts.current[item.id]) {
-            clearTimeout(quantityTimeouts.current[item.id])
-        }
-        
-        quantityTimeouts.current[item.id] = setTimeout(async () => {
-            await StoreRepository.updateCartItemQuantity(item.id, num, context.token)
-        }, 500)
+
+        cartItemUpdateMutation.mutate({
+            id: item.id,
+            quantity: num
+        })
     }
     
     return (
         <div className="w-[1000px] flex flex-col mx-auto py-8">
-            {cartItems.length == 0 && (
+            {cartItemsQuery.isLoading && <Loading className="mx-auto"/>}
+            
+            {cartItemsQuery.isSuccess && cartItemsQuery.data.length == 0 && (
                 <p className="text-4xl mx-auto text-gray-400">Cart is empty</p>
             )}
             
-            {cartItems.length > 0 && (
+            {cartItemsQuery.isSuccess && cartItemsQuery.data.length > 0 && (
                 <>
                     <Table>
                         <TableHeader>
@@ -69,7 +64,7 @@ export default function StoreCartScreen() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {cartItems.map((item) => (
+                            {cartItemsQuery.data.map(item => (
                                 <TableRow>
                                     <TableCell className="font-medium"><img className="w-20 h-14" src={item.image} alt=""/></TableCell>
                                     <TableCell>{item.name}</TableCell>
@@ -90,4 +85,64 @@ export default function StoreCartScreen() {
             )}
         </div>
     )
+}
+
+export function useCartQueries() {
+    const context = useContext(AppContext)
+    const client = useQueryClient()
+    
+    const cartItemsQuery = useQuery<CartItem[]>({
+        queryKey: cartItemsKey,
+        queryFn: async () => {
+            return (await axios.get("/api/store/cart", getAuthHeader(context.token))).data
+        }
+    })
+    
+    const cartItemUpdateMutation = useMutation({
+        mutationFn: async (update: CartItemUpdate) => {
+            return (await axios.put("/api/store", update, getAuthHeader(context.token))).data
+        },
+        onMutate: async (update: CartItemUpdate) => {
+            await client.cancelQueries({ queryKey: cartItemsKey })
+            const currentItems: CartItem[] | undefined = client.getQueryData(cartItemsKey)
+            client.setQueryData(cartItemsKey, currentItems?.map(item => {
+                if (item.id !== update.id) return item
+                return { ...item, ...update }
+            }))
+
+            return currentItems
+        },
+        onError: async (_, __, context) => {
+            client.setQueryData(cartItemsKey, context)
+        },
+        onSettled: () => client.invalidateQueries({ queryKey: cartItemsKey }),
+    })
+
+    const cartItemRemoveMutation = useMutation({
+        mutationFn: async (id: number) => {
+            return (await axios.delete(`/api/store/${id}`, getAuthHeader(context.token))).data
+        },
+        onMutate: async (id: number) => {
+            await client.cancelQueries({ queryKey: cartItemsKey })
+            const currentItems: CartItem[] | undefined = client.getQueryData(cartItemsKey)
+            client.setQueryData(cartItemsKey, currentItems?.filter(item => item.id !== id))
+            return currentItems
+        },
+        onError: async (_, __, context) => {
+            client.setQueryData(cartItemsKey, context)
+        },
+        onSettled: async () => {
+            await client.cancelQueries({queryKey: cartItemsKey})
+        }
+    })
+
+    const cartItemCreateMutation = useMutation({
+        mutationFn: async (item: CartItemUpdate) => {
+            return (await axios.post("/api/store", item, getAuthHeader(context.token))).data
+        },
+        onMutate: async () => await client.cancelQueries({ queryKey: cartItemsKey }),
+        onSuccess: async () => client.invalidateQueries({ queryKey: cartItemsKey })
+    })
+
+    return { cartItemsQuery, cartItemUpdateMutation, cartItemRemoveMutation, cartItemCreateMutation }
 }

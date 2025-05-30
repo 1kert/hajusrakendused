@@ -16,6 +16,13 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : Identi
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        var entities = modelBuilder.Model.GetEntityTypes();
+        foreach (var entity in entities)
+        {
+            if (entity.FindProperty("CreatedAt") == null) entity.AddProperty("CreatedAt", typeof(DateTime));
+            if (entity.FindProperty("UpdatedAt") == null) entity.AddProperty("UpdatedAt", typeof(DateTime));
+        }
         
         modelBuilder.Entity<BlogEntity>(entity =>
         {

@@ -4,6 +4,12 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "../../components/ui/form.tsx";
 import { Input } from "../../components/ui/input.tsx";
 import {Button} from "../../components/ui/button.tsx";
+import {useMutation} from "@tanstack/react-query";
+import axios from "axios";
+import {useContext} from "react";
+import {AppContext} from "../../App.tsx";
+import getAuthHeader from "../../repositories/AxiosHeader.ts";
+import Loading from "../../components/Loading.tsx";
 
 const formSchema = z.object({
     firstName: z
@@ -19,27 +25,37 @@ const formSchema = z.object({
         .nonempty("Email is required")
         .max(50, "Can't be longer than 50 characters")
         .regex(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/, "Not a valid email address format"),
-    phone: z
+    phoneNumber: z
         .string()
         .nonempty("Phone number is required")
         .regex(/^[+]?[(]?[0-9]{3}[)]?[- .]?[0-9]{3}[- .]?[0-9]{4,6}$/, "Not a valid phone number format")
 })
 
-type formSchemaType = z.infer<typeof formSchema>
+type FormSchemaType = z.infer<typeof formSchema>
 
 export default function StoreContinueFormScreen() {
-    const form = useForm<formSchemaType>({
+    const context = useContext(AppContext)
+    const form = useForm<FormSchemaType>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             firstName: "",
             lastName: "",
             email: "",
-            phone: ""
+            phoneNumber: ""
+        }
+    })
+    const continueMutation = useMutation({
+        mutationFn: async (data: FormSchemaType) => {
+            return (await axios.post("/api/store/payment-session", data, getAuthHeader(context.token))).data
         }
     })
     
-    function onSubmit(data: formSchemaType) {
-        console.log(JSON.stringify(data));
+    function onSubmit(data: FormSchemaType) {
+        continueMutation.mutate(data, {
+            onSuccess: (response: string) => {
+                location.href = response
+            }
+        })
     }
     
     return (
@@ -87,7 +103,7 @@ export default function StoreContinueFormScreen() {
 
                     <FormField
                         control={form.control}
-                        name="phone"
+                        name="phoneNumber"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Phone number</FormLabel>
@@ -98,7 +114,7 @@ export default function StoreContinueFormScreen() {
                             </FormItem>
                         )}/>
                     
-                    <Button type="submit" className="mt-4">Continue to checkout</Button>
+                    <Button type="submit" className="mt-4">{continueMutation.isPending ? <Loading/> : "Continue to checkout"}</Button>
                 </form>
             </Form>
         </div>

@@ -9,7 +9,9 @@ namespace hajusrakendused.Controllers;
 
 [ApiController]
 [Route("/api/store")]
-public class StoreController(StoreRepository storeRepository) : ControllerBase
+public class StoreController(
+    StoreRepository storeRepository,
+    StoreContinueRequestValidator continueRequestValidator) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetStoreItems()
@@ -73,10 +75,13 @@ public class StoreController(StoreRepository storeRepository) : ControllerBase
         return result == null ? NotFound() : Ok(result);
     }
 
-    [HttpGet("payment-session")]
+    [HttpPost("payment-session")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> GetPaymentIntent()
+    public async Task<IActionResult> GetPaymentIntent([FromBody] StoreContinueRequest request)
     {
+        var validateResult = await continueRequestValidator.ValidateAsync(request);
+        if (!validateResult.IsValid) return validateResult.GetResult();
+        
         const string domain = "http://localhost:5173/payment";
         var options = new SessionCreateOptions
         {

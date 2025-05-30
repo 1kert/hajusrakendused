@@ -86,25 +86,28 @@ public class StoreController(
         var validateResult = await continueRequestValidator.ValidateAsync(request);
         if (!validateResult.IsValid) return validateResult.GetResult();
         
+        var userId = User.GetUserId();
+        if (userId == null) return Unauthorized();
+        
+        var cart = await storeRepository.GetCartItemsResponseAsync(userId);
+        if (cart == null) return StatusCode(StatusCodes.Status500InternalServerError);
+        
         const string domain = "http://localhost:5173/payment";
         var options = new SessionCreateOptions
         {
-            LineItems = new List<SessionLineItemOptions>
+            LineItems = cart.Select(cartItem => new SessionLineItemOptions
             {
-                new SessionLineItemOptions
+                PriceData = new SessionLineItemPriceDataOptions
                 {
-                    PriceData = new SessionLineItemPriceDataOptions
+                    Currency = "usd",
+                    ProductData = new SessionLineItemPriceDataProductDataOptions
                     {
-                        Currency = "usd",
-                        ProductData = new SessionLineItemPriceDataProductDataOptions
-                        {
-                            Name = "Product"
-                        },
-                        UnitAmount = 10000
+                        Name = cartItem.Name
                     },
-                    Quantity = 1,
+                    UnitAmountDecimal = cartItem.Price * 100
                 },
-            },
+                Quantity = cartItem.Quantity
+            }).ToList(),
             Mode = "payment",
             SuccessUrl = domain + "?success=true",
             CancelUrl = domain + "?canceled=true",

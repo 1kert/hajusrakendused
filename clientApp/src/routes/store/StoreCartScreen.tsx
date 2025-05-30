@@ -7,6 +7,7 @@ import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import axios from "axios";
 import getAuthHeader from "../../repositories/AxiosHeader.ts";
 import Loading from "../../components/Loading.tsx";
+import { useNavigate } from "react-router-dom";
 
 export const cartItemsKey = ["cartItems"]
 
@@ -25,6 +26,7 @@ export interface CartItemUpdate {
 
 export default function StoreCartScreen() {
     const { cartItemUpdateMutation, cartItemRemoveMutation, cartItemsQuery } = useCartQueries()
+    const navigate = useNavigate()
     
     async function onRemoveItem(id: number) {
         cartItemRemoveMutation.mutate(id)
@@ -41,6 +43,10 @@ export default function StoreCartScreen() {
             id: item.id,
             quantity: num
         })
+    }
+    
+    function onContinueClick() {
+        navigate("/store/continue")
     }
     
     return (
@@ -80,7 +86,7 @@ export default function StoreCartScreen() {
                             ))}
                         </TableBody>
                     </Table>
-                    <Button className="w-52 ml-auto mt-8">Continue</Button>
+                    <Button className="w-52 ml-auto mt-8" onClick={onContinueClick}>Continue</Button>
                 </>
             )}
         </div>
